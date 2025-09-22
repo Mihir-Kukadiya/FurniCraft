@@ -18,7 +18,7 @@ const ContactUs = () => {
       sx={{
         bgcolor: "#fff",
         height: "auto",
-        pt: "90px",
+        pt: { xs: "40px", sm: "90px" },
       }}
     >
       <Box
@@ -34,20 +34,41 @@ const ContactUs = () => {
           textAlign: "center",
         }}
       >
-        <Typography variant="h3" fontWeight="bold">
+        <Typography
+          variant="h3"
+          fontWeight="bold"
+          sx={{ fontSize: { xs: "28px", sm: "36px", md: "48px" } ,p:0}}
+        >
           Get in Touch with Us
         </Typography>
       </Box>
 
-      <Container maxWidth={false} disableGutters sx={{ px: 3, py: 6 }}>
-        <Typography variant="h4" align="center" fontWeight="bold" gutterBottom>
+      <Container
+        maxWidth={false}
+        disableGutters
+        sx={{ px: { xs: 2, sm: 3 }, py: 6 }}
+      >
+        <Typography
+          variant="h4"
+          align="center"
+          fontWeight="bold"
+          gutterBottom
+          sx={{ fontSize: { xs: "24px", sm: "32px" } }}
+        >
           Contact Us
         </Typography>
+
         <Typography
           variant="body1"
           align="center"
           color="text.secondary"
-          sx={{ maxWidth: 700, mx: "auto", mb: 5 }}
+          sx={{
+            maxWidth: 700,
+            mx: "auto",
+            mb: 5,
+            fontSize: { xs: "14px", sm: "16px" },
+            px: { xs: 1, sm: 0 },
+          }}
         >
           Have questions or need help? Fill out the form and our team will get
           back to you as soon as possible.
@@ -62,8 +83,13 @@ const ContactUs = () => {
           }}
         >
           <Box sx={{ width: { xs: "100%", md: "48%" } }}>
-            <Card sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
+            <Card sx={{ p: { xs: 2, sm: 4 }, borderRadius: 3, boxShadow: 3 }}>
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                gutterBottom
+                sx={{ fontSize: { xs: "18px", sm: "20px" } }}
+              >
                 Send Us a Message
               </Typography>
               <TextField fullWidth label="Name" margin="normal" />
@@ -87,8 +113,13 @@ const ContactUs = () => {
           </Box>
 
           <Box sx={{ width: { xs: "100%", md: "48%" } }}>
-            <Card sx={{ p: 4, borderRadius: 3, boxShadow: 3 }}>
-              <Typography variant="h6" fontWeight="bold" gutterBottom>
+            <Card sx={{ p: { xs: 2, sm: 4 }, borderRadius: 3, boxShadow: 3 }}>
+              <Typography
+                variant="h6"
+                fontWeight="bold"
+                gutterBottom
+                sx={{ fontSize: { xs: "18px", sm: "20px" } }}
+              >
                 Our Contact Details
               </Typography>
               <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -104,7 +135,7 @@ const ContactUs = () => {
               <Typography
                 variant="h6"
                 fontWeight="bold"
-                sx={{ mt: 4 }}
+                sx={{ mt: 4, fontSize: { xs: "18px", sm: "20px" } }}
                 gutterBottom
               >
                 Working Hours

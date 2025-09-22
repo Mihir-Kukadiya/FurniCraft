@@ -1,10 +1,21 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 const FavoritesContext = createContext();
 
 export const FavoritesProvider = ({ children }) => {
-  const [favorites, setFavorites] = useState([]);
+  const email = sessionStorage.getItem("email");
+  const storageKey = email ? `favorites_${email}` : "favorites_guest";
+
+  const [favorites, setFavorites] = useState(() => {
+    const savedFavorites = localStorage.getItem(storageKey);
+    return savedFavorites ? JSON.parse(savedFavorites) : [];
+  });
+
   const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    localStorage.setItem(storageKey, JSON.stringify(favorites));
+  }, [favorites, storageKey]);
 
   const toggleFavorite = (product) => {
     setFavorites((prev) => {

@@ -283,9 +283,9 @@ const Products = () => {
                     setNewProduct({ ...newProduct, category: e.target.value })
                   }
                 >
-                  <MenuItem value="chairs">Chairs</MenuItem>
-                  <MenuItem value="sofas">Sofas</MenuItem>
-                  <MenuItem value="tables">Tables</MenuItem>
+                  <MenuItem value="Chairs">Chairs</MenuItem>
+                  <MenuItem value="Sofas">Sofas</MenuItem>
+                  <MenuItem value="Tables">Tables</MenuItem>
                 </Select>
               </FormControl>
 
@@ -556,10 +556,10 @@ const Products = () => {
         <Typography
           variant="h4"
           fontWeight="bold"
-          mb={5}
+          mb={3}
           sx={{
             textAlign: "center",
-            fontSize: "45px",
+            fontSize: { xs: "2rem", md: "2.5rem" },
           }}
         >
           All Products
@@ -574,17 +574,33 @@ const Products = () => {
               right: "20px",
               transition: ".3s",
               fontWeight: "bold",
+              marginTop: { xs: "60px", md: "0" },
             }}
           >
             + Add Item
           </Button>
         )}
-        <Grid container spacing={3} mb={4}>
-          <Grid item xs={12} md={3} width={"49%"}>
+        <Grid
+          container
+          spacing={3}
+          mb={4}
+          className="row"
+          sx={{ flexDirection: { xs: "column", md: "row" } }}
+        >
+          <Grid
+            item
+            xs={12}
+            md={3}
+            className="col"
+            sx={{ display: "flex", justifyContent: "center" }}
+          >
             <Paper
               sx={{
                 p: 3,
-                height: { xs: "300px", md: "400px" },
+                width: "100%",
+                height: "100%",
+                boxSizing: "border-box",
+                margin: "15px",
               }}
             >
               <Typography variant="h4" mb={3}>
@@ -635,24 +651,26 @@ const Products = () => {
             item
             xs={12}
             md={9}
-            width={"49%"}
+            className="col"
             sx={{
-              borderRadius: "20px",
-              overflow: "hidden",
+              display: "flex",
+              alignItems: "center",
             }}
           >
             <Box
               sx={{
+                width: "100%",
                 backgroundImage: `url(${saleImg})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-                height: { xs: "300px", md: "400px" },
+                height: { xs: 280, sm: 320, md: 400 },
+                position: "relative",
+                borderRadius: 3,
+                margin: "15px",
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "flex-start",
-                px: { xs: 2, md: 10 },
-                color: "white",
-                position: "relative",
+                px: { xs: 2, md: 8 },
+                color: "#fff",
               }}
             >
               <Box
@@ -661,9 +679,9 @@ const Products = () => {
                   inset: 0,
                   backgroundColor: "rgba(0,0,0,0.5)",
                   zIndex: 1,
+                  borderRadius: 3,
                 }}
               />
-
               <Box sx={{ zIndex: 2 }}>
                 <Typography variant="h4" fontWeight="bold">
                   Big Furniture Sale!
@@ -671,13 +689,24 @@ const Products = () => {
                 <Typography variant="h6" sx={{ my: 1 }}>
                   Up to 50% Off on Living Room & Bedroom Items
                 </Typography>
-                <Button variant="contained" color="warning" sx={{ mt: 1 }}>
+                <Button
+                  variant="contained"
+                  color="warning"
+                  sx={{ mt: 1 }}
+                  onClick={() => {
+                    const element = document.getElementById("expensive");
+                    if (element) {
+                      element.scrollIntoView({ behavior: "smooth" });
+                    }
+                  }}
+                >
                   Shop Now
                 </Button>
               </Box>
             </Box>
           </Grid>
         </Grid>
+
         <Box sx={{ width: "100%", p: 3 }}>
           {rows.map((row, rowIndex) => (
             <Box
@@ -690,8 +719,9 @@ const Products = () => {
                   onClick={() => handleOpenProduct(product)}
                   sx={{
                     cursor: "pointer",
-                    width: "472.8px",
-                    flexShrink: 0,
+                    flex: "1 1 300px",
+                    maxWidth: "100%",
+                    minWidth: "280px",
                   }}
                 >
                   <Card
@@ -710,12 +740,12 @@ const Products = () => {
                       image={product.img}
                       alt={product.name}
                       sx={{
-                        height: "370px",
-                        width: "100%",
                         objectFit: "cover",
-                        minHeight: "370px",
                         borderTopLeftRadius: 12,
                         borderTopRightRadius: 12,
+                        height: { xs: 220, sm: 280, md: 320, lg: 350 },
+                        width: "100%",
+                        transition: "0.3s ease",
                       }}
                     />
 
@@ -726,8 +756,10 @@ const Products = () => {
                         height: "100%",
                       }}
                     >
-                      <Typography variant="h6">{product.name}</Typography>
-                      <Typography color="text.secondary" sx={{ mb: 1 }}>
+                      <Typography variant="h6" fontWeight="bold">
+                        {product.name}
+                      </Typography>
+                      <Typography color="text.secondary" mb={1}>
                         ₹{Number(product.price).toLocaleString("en-IN")}
                       </Typography>
 
@@ -744,8 +776,14 @@ const Products = () => {
                           onClick={(e) => {
                             e.stopPropagation();
                             const userEmail = sessionStorage.getItem("email");
-                            if (userEmail) {
+                            if (userEmail && !isAdmin) {
                               addToCart(product);
+                            } else if (isAdmin) {
+                              setSnackbarMessage(
+                                "Admin cannot add items to cart"
+                              );
+                              setSnackbarSeverity("warning");
+                              setOpenSnackbar(true);
                             } else {
                               setSnackbarMessage(
                                 "Please log in to add items to your cart"
@@ -789,7 +827,7 @@ const Products = () => {
                                       });
                                   }}
                                   sx={{
-                                    marginRight: "10px",
+                                    marginRight: { xs: "0", md: "10px" },
                                     color: "#f44336",
                                     fontSize: "20px",
                                   }}
@@ -804,7 +842,7 @@ const Products = () => {
                                     openEditDialog(product);
                                   }}
                                   sx={{
-                                    marginRight: "10px",
+                                    marginRight: { xs: "0", md: "10px" },
                                     color: "#000",
                                     fontSize: "23px",
                                   }}
@@ -825,7 +863,23 @@ const Products = () => {
                               color={isFavorite(product) ? "error" : "default"}
                               onClick={(e) => {
                                 e.stopPropagation();
-                                toggleFavorite(product);
+                                const userEmail =
+                                  sessionStorage.getItem("email");
+                                if (userEmail && !isAdmin) {
+                                  toggleFavorite(product);
+                                } else if (isAdmin) {
+                                  setSnackbarMessage(
+                                    "Admin cannot add items in favorites"
+                                  );
+                                  setSnackbarSeverity("warning");
+                                  setOpenSnackbar(true);
+                                } else {
+                                  setSnackbarMessage(
+                                    "Please log in to add items in favorites"
+                                  );
+                                  setSnackbarSeverity("warning");
+                                  setOpenSnackbar(true);
+                                }
                               }}
                             >
                               {isFavorite(product) ? (

@@ -1,9 +1,17 @@
 import React, { useState } from "react";
-import { Box, TextField, Typography, Button } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Typography,
+  Button,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Joi from "joi";
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 
 const Register = () => {
@@ -46,15 +54,25 @@ const Register = () => {
         "any.only": "Passwords do not match.",
         "string.empty": "Confirm Password is required.",
       }),
+
+    securityQuestion: Joi.string().required().messages({
+      "string.empty": "Please select a security question.",
+    }),
+
+    securityAnswer: Joi.string().required().messages({
+      "string.empty": "Answer is required.",
+    }),
   });
 
-  // ======================= submit =============================
+  // ======================= states =============================
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [securityQuestion, setSecurityQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
@@ -68,6 +86,8 @@ const Register = () => {
         email,
         password,
         confirmPassword,
+        securityQuestion,
+        securityAnswer: answer,
       },
       { abortEarly: true }
     );
@@ -83,11 +103,28 @@ const Register = () => {
         lastName,
         email,
         password,
+        securityQuestion,
+        securityAnswer: answer,
       })
-      .then(() => navigate("/login"))
+      .then(() => {
+        // keep existing session behavior
+        sessionStorage.setItem("email", email);
+        sessionStorage.setItem("password", password);
+
+        // store security question/answer per user
+        sessionStorage.setItem(`securityQuestion_${email}`, securityQuestion);
+        sessionStorage.setItem(`securityAnswer_${email}`, answer);
+
+        // Persist security Q/A per user across browser close/open
+        localStorage.setItem(`securityQuestion_${email}`, securityQuestion);
+        localStorage.setItem(`securityAnswer_${email}`, answer);
+
+        navigate("/login");
+      })
+
       .catch((err) => {
         const msg = err.response?.data?.message;
-        if (msg?.includes("Email already registered")) {
+        if (msg?.includes("User already exists")) {
           setError("This email is already registered.");
         } else {
           setError("Registration failed. Please try again.");
@@ -95,7 +132,7 @@ const Register = () => {
       });
   };
 
-  // ======================= eye icon =============================
+  // ======================= eye icons =============================
 
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -148,6 +185,7 @@ const Register = () => {
           </Box>
         )}
 
+        {/* First Name */}
         <Box>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>First Name</Typography>
           <TextField
@@ -156,14 +194,12 @@ const Register = () => {
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             InputProps={{
-              sx: {
-                borderRadius: "10px",
-                height: "50px",
-              },
+              sx: { borderRadius: "10px", height: "50px" },
             }}
           />
         </Box>
 
+        {/* Last Name */}
         <Box>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>Last Name</Typography>
           <TextField
@@ -172,14 +208,12 @@ const Register = () => {
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
             InputProps={{
-              sx: {
-                borderRadius: "10px",
-                height: "50px",
-              },
+              sx: { borderRadius: "10px", height: "50px" },
             }}
           />
         </Box>
 
+        {/* Email */}
         <Box>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>Email</Typography>
           <TextField
@@ -188,14 +222,12 @@ const Register = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             InputProps={{
-              sx: {
-                borderRadius: "10px",
-                height: "50px",
-              },
+              sx: { borderRadius: "10px", height: "50px" },
             }}
           />
         </Box>
 
+        {/* Password */}
         <Box sx={{ position: "relative" }}>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>Password</Typography>
           <TextField
@@ -205,10 +237,7 @@ const Register = () => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             InputProps={{
-              sx: {
-                borderRadius: "10px",
-                height: "50px",
-              },
+              sx: { borderRadius: "10px", height: "50px" },
             }}
           />
           <Box
@@ -226,6 +255,7 @@ const Register = () => {
           </Box>
         </Box>
 
+        {/* Confirm Password */}
         <Box sx={{ position: "relative" }}>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>
             Confirm Password
@@ -237,10 +267,7 @@ const Register = () => {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             InputProps={{
-              sx: {
-                borderRadius: "10px",
-                height: "50px",
-              },
+              sx: { borderRadius: "10px", height: "50px" },
             }}
           />
           <Box
@@ -258,6 +285,49 @@ const Register = () => {
           </Box>
         </Box>
 
+        {/* Security Question */}
+        <Box>
+          <Typography sx={{ fontWeight: 600, mb: 1 }}>
+            Security Question
+          </Typography>
+          <FormControl fullWidth variant="outlined">
+            <InputLabel id="security-question-label">
+              Select Security Question
+            </InputLabel>
+            <Select
+              labelId="security-question-label"
+              value={securityQuestion}
+              onChange={(e) => setSecurityQuestion(e.target.value)}
+              label="Select Security Question"
+              sx={{ borderRadius: "10px", height: "50px" }}
+            >
+              <MenuItem value="favoriteColor">
+                What is your favorite color?
+              </MenuItem>
+              <MenuItem value="favoriteGame">
+                What is your favorite game?
+              </MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
+
+        {/* Answer */}
+        <Box>
+          <Typography sx={{ fontWeight: 600, mb: 1 }}>
+            Answer (For Security Question)
+          </Typography>
+          <TextField
+            fullWidth
+            placeholder="Enter your answer"
+            value={answer}
+            onChange={(e) => setAnswer(e.target.value)}
+            InputProps={{
+              sx: { borderRadius: "10px", height: "50px" },
+            }}
+          />
+        </Box>
+
+        {/* Sign Up */}
         <Button
           onClick={handleSubmit}
           sx={{
@@ -269,15 +339,14 @@ const Register = () => {
             fontWeight: 500,
             fontSize: "15px",
             mt: 1,
-            "&:hover": {
-              backgroundColor: "#000",
-            },
+            "&:hover": { backgroundColor: "#000" },
           }}
           fullWidth
         >
           Sign Up
         </Button>
 
+        {/* Go Back */}
         <Button
           onClick={() => navigate("/login")}
           sx={{

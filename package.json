@@ -20,12 +20,15 @@
     "joi": "^17.13.3",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.16.3",
+    "nodemon": "^3.1.10",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-icons": "^5.5.0",
     "react-image-magnify": "^2.7.4",
     "react-router-dom": "^7.6.2",
     "react-scripts": "5.0.1",
+    "react-scroll": "^1.9.3",
+    "sweetalert2": "^11.22.2",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

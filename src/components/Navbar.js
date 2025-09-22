@@ -11,25 +11,33 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  TextField,
   Avatar,
+  Badge,
 } from "@mui/material";
+import { useCart } from "./CartProvider";
+import { Snackbar, Alert } from "@mui/material";
+import axios from "axios";
+import { useFavorites } from "./FavoritesProvider";
 import Tooltip from "@mui/material/Tooltip";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import { FaCartShopping } from "react-icons/fa6";
 import { FaHeart } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import Drawer from "@mui/material/Drawer";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemText from "@mui/material/ListItemText";
+import MenuIcon from "@mui/icons-material/Menu";
 
 const Navbar = () => {
-  // ==================== navigate to any page =======================
+  // ========================= responsive ============================
 
-  const navItems = [
-    { label: "Home", href: "#home" },
-    { label: "Products", href: "#products" },
-    { label: "Expensive", href: "#expensive" },
-    { label: "About Us", href: "#about" },
-    { label: "Contact Us", href: "#contact" },
-    { label: "Login", href: "/login" },
-  ];
+  const isSmallScreen = useMediaQuery("(max-width: 900px)");
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // ==================== navigate to any page =======================
 
   const navigate = useNavigate();
 
@@ -61,6 +69,10 @@ const Navbar = () => {
   const email = sessionStorage.getItem("email");
   const password = sessionStorage.getItem("password");
 
+  const storedSecurityQuestion =
+    sessionStorage.getItem("securityQuestion") ||
+    localStorage.getItem("securityQuestion");
+
   const [loginError, setLoginError] = useState("");
 
   // ===================== open menu in avatar ========================
@@ -80,7 +92,45 @@ const Navbar = () => {
     setAnchorEl(null);
   };
 
+  // ===================== show number in cart ========================
+
+  const { cartItems } = useCart();
+
+  const totalQuantity = cartItems.reduce(
+    (total, item) => total + (item.quantity || 1),
+    0
+  );
+
+  // ===================== show number in favorites ========================
+
+  const { favorites } = useFavorites();
+
+  // ===================== change password box ========================
+
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [enteredAnswer, setEnteredAnswer] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // =========== error msg when click my account without login ==============
+
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
+
   // ======================================================================
+
+  const navItems = [
+    { label: "Home", href: "#home" },
+    { label: "Products", href: "#products" },
+    { label: "Expensive", href: "#expensive" },
+    { label: "About Us", href: "#about" },
+    { label: "Contact Us", href: "#contact" },
+    { label: "Favorites", href: "/favorites" },
+    { label: "Cart", href: "/cart" },
+    { label: "Admin", href: "#admin" },
+    { label: "Login", href: "/login" },
+  ];
 
   return (
     <>
@@ -89,43 +139,135 @@ const Navbar = () => {
         onClose={() => setIsDialogOpen(false)}
         maxWidth="xs"
         fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: "hidden",
+            boxShadow: 5,
+            backgroundColor: "#f9f9f9",
+          },
+        }}
       >
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+        {/* Header with gradient */}
+        <Box
+          sx={{
+            background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
+            color: "#fff",
+            p: 3,
+            textAlign: "center",
+          }}
+        >
           <Avatar
-            sx={{ bgcolor: "#1976d2", width: 60, height: 60, fontSize: 28 }}
+            sx={{
+              bgcolor: "#fff",
+              color: "#1976d2",
+              width: 80,
+              height: 80,
+              fontSize: 32,
+              mb: 2,
+              mx: "auto",
+            }}
           >
             {email?.charAt(0)?.toUpperCase()}
           </Avatar>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            {sessionStorage.getItem("isAdmin") === "true"
+              ? "Admin"
+              : "My Account"}
+          </Typography>
         </Box>
-        <DialogTitle sx={{ textAlign: "center", fontWeight: "bold" }}>
-          {sessionStorage.getItem("isAdmin") === "true"
-            ? "Admin"
-            : "My Account"}
-        </DialogTitle>
-        <DialogContent dividers>
-          <Typography variant="body1" align="center" sx={{ mb: 1 }}>
-            <strong>Email:</strong> {email}
-          </Typography>
-          <Typography variant="body1" align="center">
-            <strong>Password:</strong>{" "}
-            {password ? "*".repeat(password.length) : ""}
-          </Typography>
-        </DialogContent>
+
+        {/* Content */}
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" color="textSecondary">
+              Email
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                p: 1,
+                border: "1px solid #ddd",
+                borderRadius: 1,
+                backgroundColor: "#fff",
+                wordBreak: "break-all",
+              }}
+            >
+              {email}
+            </Typography>
+          </Box>
+
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" color="textSecondary">
+              Password
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                p: 1,
+                border: "1px solid #ddd",
+                borderRadius: 1,
+                backgroundColor: "#fff",
+                fontFamily: "monospace",
+              }}
+            >
+              {password ? "*".repeat(password.length) : ""}
+            </Typography>
+          </Box>
+
+          {sessionStorage.getItem("isAdmin") !== "true" && (
+            <Button
+              variant="contained"
+              color="primary"
+              fullWidth
+              sx={{ mb: 1 }}
+              onClick={() => {
+                setIsDialogOpen(false);
+                setIsChangePasswordOpen(true);
+              }}
+            >
+              Change Password
+            </Button>
+          )}
+
+          <Button
+            variant="outlined"
+            color="error"
+            fullWidth
+            onClick={() => {
+              sessionStorage.removeItem("email");
+              sessionStorage.removeItem("password");
+              sessionStorage.removeItem("isAdmin");
+              localStorage.removeItem("cartItems");
+              localStorage.removeItem("favorites");
+              setIsDialogOpen(false);
+              navigate("/login");
+              window.location.reload();
+            }}
+          >
+            Logout
+          </Button>
+        </Box>
       </Dialog>
 
       <Dialog
         open={isAdminDialogOpen}
         onClose={() => setIsAdminDialogOpen(false)}
-        maxWidth="xs"
         fullWidth
+        maxWidth="xs"
+        scroll="body"
         PaperProps={{
           sx: {
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -55%)",
-            width: "500px",
-            padding: "40px",
+            width: {
+              xs: "90%",
+              md: "500px",
+            },
+            maxHeight: "95vh",
+            overflowY: "auto",
+            padding: {
+              xs: "20px",
+              md: "40px",
+            },
             backgroundColor: "rgba(0,0,0,0.9)",
             boxShadow: "0 15px 25px rgba(0,0,0,0.6)",
             borderRadius: "10px",
@@ -332,132 +474,442 @@ const Navbar = () => {
         </Box>
       </Dialog>
 
+      <Dialog
+        open={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: "hidden",
+            boxShadow: 6,
+          },
+        }}
+      >
+        {/* Header */}
+        <Box
+          sx={{
+            background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
+            color: "#fff",
+            p: 3,
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+            Change Password
+          </Typography>
+          <Typography variant="body2" sx={{ mt: 1 }}>
+            Securely update your account password
+          </Typography>
+        </Box>
+
+        {/* Content */}
+        <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+          {/* Security Question */}
+          <Typography variant="subtitle1" sx={{ fontWeight: "500" }}>
+            {storedSecurityQuestion === "favoriteColor"
+              ? "What is your favorite color?"
+              : storedSecurityQuestion === "favoriteGame"
+              ? "What is your favorite game?"
+              : ""}
+          </Typography>
+
+          <TextField
+            label="Your Answer"
+            variant="outlined"
+            fullWidth
+            size="small"
+            value={enteredAnswer}
+            onChange={(e) => setEnteredAnswer(e.target.value)}
+          />
+
+          <TextField
+            label="New Password"
+            variant="outlined"
+            type="password"
+            fullWidth
+            size="small"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
+
+          {errorMsg && (
+            <Typography sx={{ color: "red", fontSize: 13 }}>
+              {errorMsg}
+            </Typography>
+          )}
+
+          <Button
+            variant="contained"
+            fullWidth
+            size="large"
+            sx={{
+              mt: 1,
+              background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
+            }}
+            onClick={async () => {
+              if (newPassword.length < 6) {
+                setErrorMsg("Password must be at least 6 characters long");
+                return;
+              }
+
+              try {
+                const email = sessionStorage.getItem("email");
+                const res = await axios.post(
+                  "http://localhost:3000/api/auth/change-password",
+                  {
+                    email,
+                    securityAnswer: enteredAnswer,
+                    newPassword,
+                  }
+                );
+
+                alert(res.data.message);
+                setErrorMsg("");
+                setIsChangePasswordOpen(false);
+                sessionStorage.setItem("password", newPassword);
+              } catch (err) {
+                setErrorMsg(
+                  err.response?.data?.message || "Error changing password"
+                );
+              }
+            }}
+          >
+            Update Password
+          </Button>
+
+          <Button
+            variant="outlined"
+            fullWidth
+            size="large"
+            color="error"
+            onClick={() => setIsChangePasswordOpen(false)}
+          >
+            Cancel
+          </Button>
+        </Box>
+      </Dialog>
+
       <AppBar position="fixed" color="default" sx={{ boxShadow: 1 }}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: "bold",
+              cursor: "pointer",
+              color: "#000",
+              textDecoration: "none",
+            }}
+            component={"a"}
+            href="/"
+          >
             FurniCraft
           </Typography>
 
-          <Box sx={{ display: "flex", gap: "15px" }}>
-            {navItems.map((item) => (
-              <Button
-                key={item.label}
+          {isSmallScreen ? (
+            <>
+              <IconButton
+                edge="start"
                 color="inherit"
-                onClick={() => handleNavClick(item.href)}
+                aria-label="menu"
+                onClick={() => setDrawerOpen(true)}
+                sx={{ mr: 1 }}
               >
-                {item.label}
-              </Button>
-            ))}
-          </Box>
-
-          <Box sx={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            <Tooltip title="Favorites">
-              <IconButton
-                component={Link}
-                to="/favorites"
-                sx={{
-                  color: "inherit",
-                  transition: "0.3s",
-                  "&:hover": {
-                    color: "#f44336",
-                    transform: "scale(1.2)",
-                  },
-                }}
-              >
-                <FaHeart style={{ fontSize: "20px" }} />
+                <MenuIcon />
               </IconButton>
-            </Tooltip>
+              <Drawer
+                anchor="right"
+                open={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+              >
+                <Box
+                  sx={{ width: 250 }}
+                  role="presentation"
+                  onClick={() => setDrawerOpen(false)}
+                  onKeyDown={() => setDrawerOpen(false)}
+                >
+                  <List>
+                    {navItems.map((item) => {
+                      if (item.label === "Admin") {
+                        if (email) return null;
+                        return (
+                          <ListItem
+                            button
+                            key="Admin"
+                            onClick={() => setIsAdminDialogOpen(true)}
+                          >
+                            <ListItemText primary="Admin" />
+                          </ListItem>
+                        );
+                      }
 
-            <Tooltip title="Cart">
+                      if (item.label === "Login") {
+                        if (email) return null;
+                        return (
+                          <ListItem
+                            button
+                            key="Login"
+                            onClick={() => navigate("/login")}
+                          >
+                            <ListItemText primary="Login" />
+                          </ListItem>
+                        );
+                      }
+
+                      return (
+                        <ListItem
+                          button
+                          key={item.label}
+                          onClick={() => handleNavClick(item.href)}
+                        >
+                          <ListItemText primary={item.label} />
+                        </ListItem>
+                      );
+                    })}
+
+                    {email && (
+                      <ListItem
+                        button
+                        onClick={() => {
+                          setDrawerOpen(false);
+                          setIsDialogOpen(true);
+                        }}
+                      >
+                        <ListItemText primary="My Account" />
+                      </ListItem>
+                    )}
+
+                    {email && sessionStorage.getItem("isAdmin") !== "true" && (
+                      <>
+                        <ListItem
+                          button
+                          onClick={() => {
+                            setDrawerOpen(false);
+                            navigate("/address");
+                          }}
+                        >
+                          <ListItemText primary="Address" />
+                        </ListItem>
+
+                        <ListItem
+                          button
+                          onClick={() => {
+                            setDrawerOpen(false);
+                            setIsChangePasswordOpen(true);
+                          }}
+                        >
+                          <ListItemText primary="Change Password" />
+                        </ListItem>
+                      </>
+                    )}
+
+                    {email && (
+                      <ListItem
+                        button
+                        onClick={() => {
+                          sessionStorage.removeItem("email");
+                          sessionStorage.removeItem("password");
+                          sessionStorage.removeItem("isAdmin");
+                          localStorage.removeItem("cartItems");
+                          localStorage.removeItem("favorites");
+                          setDrawerOpen(false);
+                          navigate("/login");
+                          window.location.reload();
+                        }}
+                      >
+                        <ListItemText primary="Logout" />
+                      </ListItem>
+                    )}
+                  </List>
+                </Box>
+              </Drawer>
+            </>
+          ) : (
+            <Box sx={{ display: "flex", gap: "15px" }}>
+              {navItems
+                .filter(
+                  (item) =>
+                    item.label !== "Cart" &&
+                    item.label !== "Admin" &&
+                    item.label !== "Favorites" &&
+                    !(item.label === "Login" && email)
+                )
+                .map((item) => (
+                  <Button
+                    key={item.label}
+                    color="inherit"
+                    onClick={() => handleNavClick(item.href)}
+                  >
+                    {item.label}
+                  </Button>
+                ))}
+            </Box>
+          )}
+
+          {!isSmallScreen && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <Tooltip title="Favorites">
+                <IconButton
+                  component={Link}
+                  to="/favorites"
+                  sx={{
+                    color: "inherit",
+                    transition: "0.3s",
+                    "&:hover": {
+                      color: "#f44336",
+                      transform: "scale(1.2)",
+                    },
+                  }}
+                >
+                  <Badge
+                    badgeContent={favorites.length}
+                    color="error"
+                    invisible={favorites.length === 0}
+                  >
+                    <FaHeart style={{ fontSize: "20px" }} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Cart">
+                <IconButton
+                  component={Link}
+                  to="/cart"
+                  sx={{
+                    color: "inherit",
+                    transition: "0.3s",
+                    "&:hover": {
+                      color: "#1976d2",
+                      transform: "scale(1.2)",
+                    },
+                  }}
+                >
+                  <Badge
+                    badgeContent={totalQuantity}
+                    color="error"
+                    invisible={totalQuantity === 0}
+                  >
+                    <FaCartShopping style={{ fontSize: "20px" }} />
+                  </Badge>
+                </IconButton>
+              </Tooltip>
               <IconButton
-                component={Link}
-                to="/cart"
-                sx={{
-                  color: "inherit",
-                  transition: "0.3s",
-                  "&:hover": {
-                    color: "#1976d2",
-                    transform: "scale(1.2)",
-                  },
-                }}
+                size="small"
+                onClick={handleMenu}
+                color="inherit"
+                aria-label="account of current user"
+                aria-controls="menu-appbar"
+                aria-haspopup="true"
               >
-                <FaCartShopping style={{ fontSize: "20px" }} />
+                <Avatar
+                  sx={{
+                    height: "20px",
+                    width: "20px",
+                    color: "#000",
+                    border: "none",
+                    padding: email ? "20px" : "0",
+                    backgroundColor: email ? "#1976D2" : "transparent",
+                  }}
+                >
+                  {email ? email.charAt(0).toUpperCase() : <AccountCircle />}
+                </Avatar>
               </IconButton>
-            </Tooltip>
-            <IconButton
-              size="small"
-              onClick={handleMenu}
-              color="inherit"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-            >
-              <Avatar
-                sx={{
-                  height: "20px",
-                  width: "20px",
-                  color: "#000",
-                  border: "none",
-                  padding: email ? "20px" : "0",
-                  backgroundColor: email ? "#1976D2" : "transparent",
-                }}
-              >
-                {email ? email.charAt(0).toUpperCase() : <AccountCircle />}
-              </Avatar>
-            </IconButton>
 
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorEl}
-              anchorOrigin={{ vertical: "top", horizontal: "right" }}
-              keepMounted
-              transformOrigin={{ vertical: "top", horizontal: "right" }}
-              open={Boolean(anchorEl)}
-              onClose={handleCloseMenu}
-            >
-              <MenuItem
-                onClick={() => {
-                  handleCloseMenu();
-                  setIsDialogOpen(true);
-                }}
+              <Menu
+                id="menu-appbar"
+                anchorEl={anchorEl}
+                anchorOrigin={{ vertical: "top", horizontal: "right" }}
+                keepMounted
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+                open={Boolean(anchorEl)}
+                onClose={handleCloseMenu}
               >
-                My account
-              </MenuItem>
-              <MenuItem
-                onClick={() => {
-                  handleCloseMenu();
-                  setIsAdminDialogOpen(true);
-                }}
-              >
-                Admin
-              </MenuItem>
-
-              {email ? (
                 <MenuItem
                   onClick={() => {
                     handleCloseMenu();
-                    sessionStorage.removeItem("email");
-                    sessionStorage.removeItem("password");
-                    sessionStorage.removeItem("isAdmin");
-                    navigate("/login");
+                    if (!email) {
+                      setSnackbarMessage("Please log in to view your account");
+                      setSnackbarSeverity("warning");
+                      setOpenSnackbar(true);
+                    } else {
+                      setIsDialogOpen(true);
+                    }
                   }}
                 >
-                  Log Out
+                  My account
                 </MenuItem>
-              ) : (
-                <MenuItem
-                  onClick={() => {
-                    handleCloseMenu();
-                    navigate("/login");
-                  }}
-                >
-                  Login
-                </MenuItem>
-              )}
-            </Menu>
-          </Box>
+
+                {!email && (
+                  <MenuItem
+                    onClick={() => {
+                      handleCloseMenu();
+                      setIsAdminDialogOpen(true);
+                    }}
+                  >
+                    Admin
+                  </MenuItem>
+                )}
+                {email && sessionStorage.getItem("isAdmin") !== "true" && (
+                  <MenuItem
+                    onClick={() => {
+                      handleCloseMenu();
+                      navigate("/address");
+                    }}
+                  >
+                    Address
+                  </MenuItem>
+                )}
+                {email && sessionStorage.getItem("isAdmin") !== "true" && (
+                  <MenuItem
+                    onClick={() => {
+                      handleCloseMenu();
+                      setIsChangePasswordOpen(true);
+                    }}
+                  >
+                    Change Password
+                  </MenuItem>
+                )}
+                {email ? (
+                  <MenuItem
+                    onClick={() => {
+                      handleCloseMenu();
+                      sessionStorage.removeItem("email");
+                      sessionStorage.removeItem("password");
+                      sessionStorage.removeItem("isAdmin");
+                      navigate("/login");
+                    }}
+                  >
+                    Log Out
+                  </MenuItem>
+                ) : (
+                  <MenuItem
+                    onClick={() => {
+                      handleCloseMenu();
+                      navigate("/login");
+                    }}
+                  >
+                    Login
+                  </MenuItem>
+                )}
+              </Menu>
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={3000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

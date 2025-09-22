@@ -24,12 +24,27 @@ const Favorites = () => {
         px: { xs: 2, md: 5 },
       }}
     >
-      <Typography variant="h3" fontWeight="bold" mb={4}>
+      <Typography
+        variant="h3"
+        fontWeight="bold"
+        mb={4}
+        sx={{
+          fontSize: { xs: "2rem", md: "2.5rem" },
+          textAlign: { xs: "center", md: "left" },
+        }}
+      >
         Your Favorites
       </Typography>
 
       {favorites.length === 0 ? (
-        <Typography variant="h6" color="text.secondary">
+        <Typography
+          variant="h6"
+          color="text.secondary"
+          sx={{
+            fontSize: { xs: "0.5rem", md: "1rem" },
+            textAlign: { xs: "center", md: "left" },
+          }}
+        >
           No favorite items yet.
         </Typography>
       ) : (
@@ -50,7 +65,7 @@ const Favorites = () => {
                   boxShadow: 3,
                   backgroundColor: "#fff",
                   position: "relative",
-                  width: '100%'
+                  width: "100%",
                 }}
               >
                 <Box sx={{ position: "relative" }}>
@@ -90,8 +105,11 @@ const Favorites = () => {
                     sx={{
                       borderRadius: 3,
                       display: "flex",
+                      flexDirection: { xs: "column", sm: "row" },
+                      alignItems: { xs: "center", sm: "flex-start" },
                       gap: "20px",
                       boxShadow: "none",
+                      textAlign: { xs: "center", sm: "left" },
                     }}
                   >
                     <CardMedia
@@ -100,16 +118,26 @@ const Favorites = () => {
                       alt={item.name}
                       sx={{
                         objectFit: "cover",
-                        height: "200px",
-                        width: "250px",
+                        height: { xs: "200px", sm: "200px" },
+                        width: { xs: "100%", sm: "250px" },
                         borderRadius: "20px",
                       }}
                     />
                     <CardContent sx={{ flex: 1 }}>
-                      <Typography variant="h5">{item.name}</Typography>
-                      <Typography color="text.secondary" mb={2}>
-                        {item.price}
+                      <Typography
+                        variant="h6"
+                        fontWeight="bold"
+                        sx={{ wordBreak: "break-word" }}
+                      >
+                        {item.name}
                       </Typography>
+                      <Typography color="text.secondary" mb={2}>
+                        ₹
+                        {parseInt(
+                          item.price.replace(/[^\d]/g, "")
+                        ).toLocaleString("en-IN")}
+                      </Typography>
+
                       <Button
                         variant="outlined"
                         color="error"

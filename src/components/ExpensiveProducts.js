@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Grid,
   Card,
   CardMedia,
   CardContent,
@@ -29,23 +28,20 @@ const ExpensiveProducts = () => {
       name: "L shaped Boutique sofa",
       price: "₹2,11,860",
       img: expensivesofa,
-      category: "sofa",
       description:
         "Handcrafted for discerning tastes, this designer L-shaped sofa boasts custom upholstery, feather-filled cushions, and timeless European styling.",
     },
     {
-      name: "Gold Skull Armchair",
+      name: "Luxury Gold Chair",
       price: "₹4,27,42,750",
       img: expensivechair,
-      category: "chair",
       description:
-        "A bold fusion of art and furniture, this limited-edition armchair features gold-plated detailing and a sculpted skull motif—making a statement in any luxury setting.",
+        "A bold fusion of art and furniture, this limited-edition Luxury Gold Chair features gold-plated detailing and a sculpted motif—making a statement in any luxury setting.",
     },
     {
-      name: "Eden Gold Center Table",
+      name: "Luxury Gold Stainless Steel Frame Marble Table",
       price: "₹11,00,000",
       img: expensivetable,
-      category: "table",
       description:
         "Inspired by nature, this center table features intricate gold leaf designs and a glass top, transforming any room into a work of art.",
     },
@@ -74,6 +70,12 @@ const ExpensiveProducts = () => {
   const isFavorited = (product) =>
     favorites.some((fav) => fav.name === product.name);
 
+  // ============== without login not add products in cart ===========
+
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("info");
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+
   // ====================================================================
 
   return (
@@ -81,7 +83,7 @@ const ExpensiveProducts = () => {
       id="expensive"
       sx={{
         p: 3,
-        height: "100vh",
+        height: "auto",
         paddingTop: "90px",
       }}
     >
@@ -99,91 +101,190 @@ const ExpensiveProducts = () => {
           {message}
         </Alert>
       </Snackbar>
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={2000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity={snackbarSeverity}
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
 
       <Typography
         variant="h4"
         fontWeight="bold"
         mb={5}
-        sx={{ textAlign: "center", fontSize: "45px" }}
+        sx={{ textAlign: "center", fontSize: { xs: "2rem", md: "2.5rem" } }}
       >
         Elite Picks
       </Typography>
 
-      <Box
-        sx={{
-          display: "flex",
-          gap: 3,
-          justifyContent: "center",
-          flexWrap: "nowrap",
-          overflowX: "auto",
-          pb: 3,
-        }}
-      >
-        {expensiveProducts.map((product, index) => (
-          <Card
-            key={index}
-            onClick={() => handleOpenProduct(product)}
-            sx={{
-              width: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              borderRadius: 3,
-              border: "1px solid #ccc",
-              boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
-              position: "relative",
-              cursor: "pointer",
-            }}
-          >
-            <CardMedia
-              component="img"
-              height="250"
-              image={product.img}
-              alt={product.name}
-              sx={{ objectFit: "cover", height: "370px" }}
-            />
-            <CardContent sx={{ flexGrow: 1 }}>
-              <Typography variant="h6" fontWeight="bold">
-                {product.name}
-              </Typography>
-              <Typography color="text.secondary" mb={2}>
-                {product.price}
-              </Typography>
-              <Box display="flex" justifyContent="space-between">
-                <Button
-                  variant="outlined"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToCart(product);
+      <Box sx={{ width: "100%" }}>
+        {(() => {
+          const cardsPerRow = 3;
+          const rows = [];
+          for (let i = 0; i < expensiveProducts.length; i += cardsPerRow) {
+            rows.push(expensiveProducts.slice(i, i + cardsPerRow));
+          }
+          return rows.map((row, rowIndex) => (
+            <Box
+              key={rowIndex}
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 3,
+                justifyContent: "center",
+                mb: 3,
+              }}
+            >
+              {row.map((product, index) => (
+                <Box
+                  key={index}
+                  sx={{
+                    flex: "1 1 300px",
+                    maxWidth: "100%",
+                    minWidth: "280px",
+                    cursor: "pointer",
                   }}
+                  onClick={() => handleOpenProduct(product)}
                 >
-                  Add to Cart
-                </Button>
-                <Tooltip
-                  title={
-                    isFavorited(product)
-                      ? "Remove from favorites"
-                      : "Add to favorites"
-                  }
-                >
-                  <IconButton
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleFavorite(product);
+                  <Card
+                    sx={{
+                      borderRadius: 3,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
+                      border: "1px solid #ccc",
                     }}
                   >
-                    {isFavorited(product) ? (
-                      <FavoriteIcon color="error" />
-                    ) : (
-                      <FavoriteBorder />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              </Box>
-            </CardContent>
-          </Card>
-        ))}
+                    <CardMedia
+                      component="img"
+                      image={product.img}
+                      alt={product.name}
+                      sx={{
+                        objectFit: "cover",
+                        borderTopLeftRadius: 12,
+                        borderTopRightRadius: 12,
+                        height: { xs: 220, sm: 280, md: 320, lg: 350 },
+                        width: "100%",
+                        transition: "0.3s ease",
+                      }}
+                    />
+
+                    <CardContent
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        height: "100%",
+                      }}
+                    >
+                      <Box>
+                        <Typography variant="h6" fontWeight="bold">
+                          {product.name}
+                        </Typography>
+                        <Typography color="text.secondary" mb={1}>
+                          {product.price}
+                        </Typography>
+                      </Box>
+
+                      <Box
+                        mt="auto"
+                        display="flex"
+                        justifyContent="space-between"
+                      >
+                        <Button
+                          variant="outlined"
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const userEmail = sessionStorage.getItem("email");
+                            const isAdmin =
+                              sessionStorage.getItem("isAdmin") === "true";
+
+                            if (userEmail && !isAdmin) {
+                              addToCart(product);
+                            } else if (isAdmin) {
+                              setSnackbarMessage(
+                                "Admin cannot add items to cart"
+                              );
+                              setSnackbarSeverity("warning");
+                              setOpenSnackbar(true);
+                            } else {
+                              setSnackbarMessage(
+                                "Please log in to add items to your cart"
+                              );
+                              setSnackbarSeverity("warning");
+                              setOpenSnackbar(true);
+                            }
+                          }}
+                        >
+                          Add to Cart
+                        </Button>
+
+                        <Tooltip
+                          title={
+                            isFavorited(product)
+                              ? "Remove from favorites"
+                              : "Add to favorites"
+                          }
+                        >
+                          <Tooltip
+                            title={
+                              isFavorited(product)
+                                ? "Remove from favorites"
+                                : "Add to favorites"
+                            }
+                          >
+                            <IconButton
+                              color={isFavorited(product) ? "error" : "default"}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const userEmail =
+                                  sessionStorage.getItem("email");
+                                const isAdmin =
+                                  sessionStorage.getItem("isAdmin") === "true";
+
+                                if (userEmail && !isAdmin) {
+                                  toggleFavorite(product);
+                                } else if (isAdmin) {
+                                  setSnackbarMessage(
+                                    "Admin cannot add items in favorites"
+                                  );
+                                  setSnackbarSeverity("warning");
+                                  setOpenSnackbar(true);
+                                } else {
+                                  setSnackbarMessage(
+                                    "Please log in to add items in favorites"
+                                  );
+                                  setSnackbarSeverity("warning");
+                                  setOpenSnackbar(true);
+                                }
+                              }}
+                            >
+                              {isFavorited(product) ? (
+                                <FavoriteIcon />
+                              ) : (
+                                <FavoriteBorder />
+                              )}
+                            </IconButton>
+                          </Tooltip>
+                        </Tooltip>
+                      </Box>
+                    </CardContent>
+                  </Card>
+                </Box>
+              ))}
+            </Box>
+          ));
+        })()}
       </Box>
 
       <ProductDetail

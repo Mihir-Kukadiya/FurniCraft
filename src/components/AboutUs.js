@@ -114,13 +114,20 @@ const AboutUs = () => {
           textAlign: "center",
         }}
       >
-        <Typography variant="h2" fontWeight="bold" sx={{ px: 2 }}>
+        <Typography
+          variant="h2"
+          fontWeight="bold"
+          sx={{ px: 2, fontSize: { xs: "32px", sm: "42px", md: "56px" } }}
+        >
           Crafting Comfort with Elegance
         </Typography>
       </Box>
 
       <Container maxWidth={false} disableGutters sx={{ py: 6 }}>
-        <Typography variant="h4" align="center" fontWeight="bold" gutterBottom>
+        <Typography align="center" fontWeight="bold" gutterBottom
+        sx={{
+          fontSize: { xs: "2rem", md: "2.5rem" },
+        }}>
           About Us
         </Typography>
         <Typography
@@ -136,31 +143,69 @@ const AboutUs = () => {
 
         <Divider sx={{ my: 4 }} />
 
-        <Grid container spacing={4} sx={{ mb: 6, px: 3 }}>
-          {values.map((val, idx) => (
-            <Grid className="col" item xs={12} sm={6} md={6} key={idx}>
-              <Card
+        <Box sx={{ width: "100%", mb: 6, px: { xs: 2, sm: 3 } }}>
+          {(() => {
+            const cardsPerRow = 4;
+            const rows = [];
+            for (let i = 0; i < values.length; i += cardsPerRow) {
+              rows.push(values.slice(i, i + cardsPerRow));
+            }
+
+            return rows.map((row, rowIndex) => (
+              <Box
+                key={rowIndex}
                 sx={{
-                  p: 4,
-                  textAlign: "center",
-                  borderRadius: 3,
-                  boxShadow: 3,
-                  height: "100%",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: { xs: "center", lg: "space-between" },
+                  gap: 3,
+                  mb: 3,
                 }}
               >
-                <Avatar sx={{ bgcolor: val.color, mx: "auto", mb: 2 }}>
-                  {val.icon}
-                </Avatar>
-                <Typography variant="h6" fontWeight="bold">
-                  {val.title}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" mt={1}>
-                  {val.description}
-                </Typography>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
+                {row.map((val, idx) => (
+                  <Box
+                    key={idx}
+                    sx={{
+                      flex: "1 1 calc(100% - 24px)",
+                      minWidth: {
+                        xs: "100%",
+                        sm: "calc(50% - 24px)",
+                        md: "calc(33.33% - 24px)",
+                        lg: "calc(25% - 24px)",
+                      },
+                      maxWidth: {
+                        xs: "100%",
+                        sm: "calc(50% - 24px)",
+                        md: "calc(33.33% - 24px)",
+                        lg: "calc(25% - 24px)",
+                      },
+                    }}
+                  >
+                    <Card
+                      sx={{
+                        p: { xs: 2, sm: 3, md: 4 },
+                        textAlign: "center",
+                        borderRadius: 3,
+                        boxShadow: 3,
+                        height: "100%",
+                      }}
+                    >
+                      <Avatar sx={{ bgcolor: val.color, mx: "auto", mb: 2 }}>
+                        {val.icon}
+                      </Avatar>
+                      <Typography variant="h6" fontWeight="bold">
+                        {val.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" mt={1}>
+                        {val.description}
+                      </Typography>
+                    </Card>
+                  </Box>
+                ))}
+              </Box>
+            ));
+          })()}
+        </Box>
 
         <Typography variant="h4" align="center" fontWeight="bold" gutterBottom>
           Meet Our Team
@@ -169,21 +214,33 @@ const AboutUs = () => {
           variant="body1"
           align="center"
           color="text.secondary"
-          sx={{ maxWidth: 600, mx: "auto", mb: 5 }}
+          sx={{
+            maxWidth: 700,
+            mx: "auto",
+            mb: 5,
+            px: { xs: 2, sm: 0 },
+          }}
         >
           Our dedicated team brings passion, creativity, and craftsmanship to
           every product we build.
         </Typography>
 
-        <Grid container spacing={4} justifyContent="center" sx={{ px: 3 }}>
+        <Grid
+          container
+          spacing={4}
+          justifyContent="center"
+          sx={{ px: { xs: 2, sm: 3 } }}
+        >
           {teamMembers.map((member, idx) => (
             <Grid item xs={12} sm={6} md={4} key={idx}>
               <Card
                 onClick={() => handleOpen(member)}
                 sx={{
                   textAlign: "center",
-                  p: 3,
+                  p: { xs: 2, sm: 3 },
                   borderRadius: 3,
+                  width: "200px",
+                  height: '220px',
                   boxShadow: 2,
                   cursor: "pointer",
                   transition: "0.3s",
@@ -208,8 +265,8 @@ const AboutUs = () => {
                   variant="body2"
                   color="text.secondary"
                   sx={{
-                    width: "200px",
                     mx: "auto",
+                    textAlign: "center",
                   }}
                 >
                   {member.role}
@@ -235,7 +292,7 @@ const AboutUs = () => {
                   flexDirection: "column",
                   alignItems: "center",
                   textAlign: "center",
-                  padding: "15px",
+                  padding: { xs: "10px", sm: "15px" },
                   gap: 2,
                 }}
               >

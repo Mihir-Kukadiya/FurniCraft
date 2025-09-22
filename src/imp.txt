@@ -1,0 +1,14 @@
+================ mongoDB =======================
+
+username = mihir
+password = MJ3fCPuacBdv1Ubp
+cluster-url = crud.gpf5w.mongodb.net
+database = FurniCraft
+
+================ structure of mongoDB URL ===================
+
+mongodb+srv://<username>:<password>@<cluster-url>/<database>?retryWrites=true&w=majority
+
+================ future fixes =================
+
+1. when user checkout then that order is showing to admin.
