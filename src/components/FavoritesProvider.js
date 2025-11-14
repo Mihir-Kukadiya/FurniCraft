@@ -3,16 +3,22 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 const FavoritesContext = createContext();
 
 const FavoritesProvider = ({ children }) => {
-
   // ========================= manage favorite items =========================
 
-  const email = sessionStorage.getItem("email");
-  const storageKey = email ? `favorites_${email}` : "favorites_guest";
+  const [storageKey, setStorageKey] = useState("favorites_guest");
 
-  const [favorites, setFavorites] = useState(() => {
-    const savedFavorites = localStorage.getItem(storageKey);
-    return savedFavorites ? JSON.parse(savedFavorites) : [];
-  });
+  useEffect(() => {
+    const email = sessionStorage.getItem("email");
+    setStorageKey(email ? `favorites_${email}` : "favorites_guest");
+  }, []);
+
+  const [favorites, setFavorites] = useState([]);
+
+useEffect(() => {
+  const saved = localStorage.getItem(storageKey);
+  setFavorites(saved ? JSON.parse(saved) : []);
+}, [storageKey]);
+
 
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(favorites));
