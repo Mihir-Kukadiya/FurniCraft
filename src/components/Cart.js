@@ -17,8 +17,13 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import { useCart } from "./CartProvider";
 
 const Cart = () => {
+
+  // ========================== cart items ===============================
+
   const { cartItems, setCartItems } = useCart();
   const navigate = useNavigate();
+
+  // ============================ set price in numeric ===============================
 
   const getNumericPrice = (item) => {
     if (typeof item.price === "number") return item.price;
@@ -29,6 +34,15 @@ const Cart = () => {
     return 0;
   };
 
+  // ============================ calculate total price ===============================
+
+  const totalPrice = cartItems.reduce((sum, item) => {
+    const qty = item.quantity || 1;
+    return sum + qty * getNumericPrice(item);
+  }, 0);
+
+  // ============================== quantity change ===============================
+
   const handleQuantityChange = (index, delta) => {
     const updated = cartItems.map((item, i) =>
       i === index
@@ -38,15 +52,14 @@ const Cart = () => {
     setCartItems(updated);
   };
 
+  // =========================== remove items from cart ============================
+
   const removeFromCart = (index) => {
     const updated = cartItems.filter((_, i) => i !== index);
     setCartItems(updated);
   };
 
-  const totalPrice = cartItems.reduce((sum, item) => {
-    const qty = item.quantity || 1;
-    return sum + qty * getNumericPrice(item);
-  }, 0);
+  // ===============================================================================
 
   return (
     <Box

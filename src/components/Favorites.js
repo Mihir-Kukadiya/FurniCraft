@@ -12,9 +12,20 @@ import { useFavorites } from "./FavoritesProvider";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 
 const Favorites = () => {
+
+  // ======================== remove item from favorites ========================
+
   const { favorites, removeFavorite } = useFavorites();
 
-  const parsePrice = (price) => parseInt(price.replace(/[^\d]/g, ""));
+  // ======================== parse product price ========================
+  
+  const parsePrice = (price) => {
+    if (!price) return 0;
+    const priceStr = typeof price === "string" ? price : price.toString();
+    return parseInt(priceStr.replace(/[^\d]/g, ""), 10);
+  };
+
+  // ==========================================================================
 
   return (
     <Box
@@ -132,10 +143,7 @@ const Favorites = () => {
                         {item.name}
                       </Typography>
                       <Typography color="text.secondary" mb={2}>
-                        ₹
-                        {parseInt(
-                          item.price.replace(/[^\d]/g, "")
-                        ).toLocaleString("en-IN")}
+                        ₹{parsePrice(item.price).toLocaleString("en-IN")}
                       </Typography>
 
                       <Button

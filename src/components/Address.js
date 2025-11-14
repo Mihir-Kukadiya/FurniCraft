@@ -13,8 +13,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
 const Address = () => {
-  const email = sessionStorage.getItem("email"); // ✅ get logged-in email
-  const storageKey = email ? `addresses_${email}` : "addresses_guest";
+  // ============================= address fields ===============================
 
   const [addresses, setAddresses] = useState([]);
   const [form, setForm] = useState({
@@ -28,6 +27,11 @@ const Address = () => {
   const [editIndex, setEditIndex] = useState(-1);
   const [errors, setErrors] = useState({});
 
+  // ============================ local storage key ===============================
+
+  const email = sessionStorage.getItem("email");
+  const storageKey = email ? `addresses_${email}` : "addresses_guest";
+
   useEffect(() => {
     const stored = localStorage.getItem(storageKey);
     if (stored) setAddresses(JSON.parse(stored));
@@ -37,11 +41,12 @@ const Address = () => {
     localStorage.setItem(storageKey, JSON.stringify(addresses));
   }, [addresses, storageKey]);
 
+  // ===================== Auto generate city & state when pincode is 6 digits ==================
+
   const handleChange = async (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
 
-    // Auto fetch city & state when pincode is 6 digits
     if (name === "pincode" && value.length === 6) {
       try {
         const res = await fetch(
@@ -63,20 +68,19 @@ const Address = () => {
     }
   };
 
+  // ========================= Validate form fields ==============================
+
   const validate = () => {
     let newErrors = {};
 
-    // ✅ Name validation
     if (!/^[A-Za-z ]+$/.test(form.name)) {
       newErrors.name = "Full Name must contain only letters";
     }
 
-    // ✅ Mobile validation
     if (!/^[0-9]{10}$/.test(form.mobile)) {
       newErrors.mobile = "Mobile number must be 10 digits";
     }
 
-    // ✅ Empty fields validation
     if (
       !form.name ||
       !form.street ||
@@ -90,6 +94,8 @@ const Address = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  // ========================== Add address =============================
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -119,10 +125,14 @@ const Address = () => {
     setErrors({});
   };
 
+  // ========================== Edit address =============================
+
   const handleEdit = (index) => {
     setForm(addresses[index]);
     setEditIndex(index);
   };
+
+  // ========================== Delete address =============================
 
   const handleDelete = (index) => {
     const updated = addresses.filter((_, i) => i !== index);
@@ -139,6 +149,8 @@ const Address = () => {
       setEditIndex(-1);
     }
   };
+
+  // ===================================================================
 
   return (
     <Box sx={{ paddingTop: "90px", px: { xs: 2, md: 5 } }}>

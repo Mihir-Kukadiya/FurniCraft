@@ -9,13 +9,12 @@ import {
   Menu,
   MenuItem,
   Dialog,
-  TextField,
   Avatar,
   Badge,
 } from "@mui/material";
 import { useCart } from "./CartProvider";
 import { Snackbar, Alert } from "@mui/material";
-import axios from "axios";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useFavorites } from "./FavoritesProvider";
 import Tooltip from "@mui/material/Tooltip";
 import AccountCircle from "@mui/icons-material/AccountCircle";
@@ -67,11 +66,12 @@ const Navbar = () => {
   const email = sessionStorage.getItem("email");
   const password = sessionStorage.getItem("password");
 
-  const storedSecurityQuestion =
-    sessionStorage.getItem("securityQuestion") ||
-    localStorage.getItem("securityQuestion");
-
   const [loginError, setLoginError] = useState("");
+
+  // ======================= eye icon =============================
+
+  const [showPassword, setShowPassword] = useState(false);
+  const handlePasswordClick = () => setShowPassword((prev) => !prev);
 
   // ===================== open menu in avatar ========================
 
@@ -103,20 +103,13 @@ const Navbar = () => {
 
   const { favorites } = useFavorites();
 
-  // ===================== change password box ========================
-
-  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
-  const [enteredAnswer, setEnteredAnswer] = useState("");
-  const [newPassword, setNewPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
-
   // =========== error msg when click my account without login ==============
 
   const [openSnackbar, setOpenSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
 
-  // ======================================================================
+  // ============================ nav items ==================================
 
   const navItems = [
     { label: "Home", href: "#home" },
@@ -129,6 +122,8 @@ const Navbar = () => {
     { label: "Admin", href: "#admin" },
     { label: "Login", href: "/login" },
   ];
+
+  // ==============================================================
 
   return (
     <>
@@ -146,7 +141,6 @@ const Navbar = () => {
           },
         }}
       >
-        {/* Header with gradient */}
         <Box
           sx={{
             background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
@@ -166,7 +160,9 @@ const Navbar = () => {
               mx: "auto",
             }}
           >
-            {email?.charAt(0)?.toUpperCase()}
+            {sessionStorage.getItem("isAdmin") === "true"
+              ? "A"
+              : email?.charAt(0)?.toUpperCase()}
           </Avatar>
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             {sessionStorage.getItem("isAdmin") === "true"
@@ -175,7 +171,6 @@ const Navbar = () => {
           </Typography>
         </Box>
 
-        {/* Content */}
         <Box sx={{ p: 3 }}>
           <Box sx={{ mb: 2 }}>
             <Typography variant="subtitle2" color="textSecondary">
@@ -212,21 +207,6 @@ const Navbar = () => {
               {password ? "*".repeat(password.length) : ""}
             </Typography>
           </Box>
-
-          {sessionStorage.getItem("isAdmin") !== "true" && (
-            <Button
-              variant="contained"
-              color="primary"
-              fullWidth
-              sx={{ mb: 1 }}
-              onClick={() => {
-                setIsDialogOpen(false);
-                setIsChangePasswordOpen(true);
-              }}
-            >
-              Change Password
-            </Button>
-          )}
 
           <Button
             variant="outlined"
@@ -328,7 +308,7 @@ const Navbar = () => {
           <Box sx={{ position: "relative", mb: "30px" }}>
             <input
               required
-              type="password"
+              type={showPassword ? "text" : "password"}
               value={adminPassword}
               onChange={(e) => setAdminPassword(e.target.value)}
               onFocus={() => setPassFocus(true)}
@@ -357,6 +337,20 @@ const Navbar = () => {
             >
               Password
             </label>
+            <Box
+              onClick={handlePasswordClick}
+              sx={{
+                position: "absolute",
+                right: "0",
+                top: "50%",
+                transform: "translateY(-50%)",
+                cursor: "pointer",
+                color: "#fff",
+                fontSize: "18px",
+              }}
+            >
+              {showPassword ? <FaEye /> : <FaEyeSlash />}
+            </Box>
           </Box>
           {loginError && (
             <Typography
@@ -373,13 +367,14 @@ const Navbar = () => {
               onClick={() => {
                 if (
                   adminEmail === "mkukadiya001@gmail.com" &&
-                  adminPassword === "Mihir@4004"
+                  adminPassword === "Mihir@3190"
                 ) {
                   sessionStorage.setItem("email", adminEmail);
                   sessionStorage.setItem("password", adminPassword);
                   sessionStorage.setItem("isAdmin", "true");
                   setIsAdminDialogOpen(false);
                   setLoginError("");
+                  navigate("/");
                 } else {
                   setLoginError("Invalid email or password");
                 }
@@ -472,123 +467,6 @@ const Navbar = () => {
         </Box>
       </Dialog>
 
-      <Dialog
-        open={isChangePasswordOpen}
-        onClose={() => setIsChangePasswordOpen(false)}
-        maxWidth="xs"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            overflow: "hidden",
-            boxShadow: 6,
-          },
-        }}
-      >
-        {/* Header */}
-        <Box
-          sx={{
-            background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
-            color: "#fff",
-            p: 3,
-            textAlign: "center",
-          }}
-        >
-          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            Change Password
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 1 }}>
-            Securely update your account password
-          </Typography>
-        </Box>
-
-        {/* Content */}
-        <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}>
-          {/* Security Question */}
-          <Typography variant="subtitle1" sx={{ fontWeight: "500" }}>
-            {storedSecurityQuestion === "favoriteColor"
-              ? "What is your favorite color?"
-              : storedSecurityQuestion === "favoriteGame"
-              ? "What is your favorite game?"
-              : ""}
-          </Typography>
-
-          <TextField
-            label="Your Answer"
-            variant="outlined"
-            fullWidth
-            size="small"
-            value={enteredAnswer}
-            onChange={(e) => setEnteredAnswer(e.target.value)}
-          />
-
-          <TextField
-            label="New Password"
-            variant="outlined"
-            type="password"
-            fullWidth
-            size="small"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-
-          {errorMsg && (
-            <Typography sx={{ color: "red", fontSize: 13 }}>
-              {errorMsg}
-            </Typography>
-          )}
-
-          <Button
-            variant="contained"
-            fullWidth
-            size="large"
-            sx={{
-              mt: 1,
-              background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
-            }}
-            onClick={async () => {
-              if (newPassword.length < 6) {
-                setErrorMsg("Password must be at least 6 characters long");
-                return;
-              }
-
-              try {
-                const email = sessionStorage.getItem("email");
-                const res = await axios.post(
-                  "http://localhost:3000/api/auth/change-password",
-                  {
-                    email,
-                    securityAnswer: enteredAnswer,
-                    newPassword,
-                  }
-                );
-
-                alert(res.data.message);
-                setErrorMsg("");
-                setIsChangePasswordOpen(false);
-                sessionStorage.setItem("password", newPassword);
-              } catch (err) {
-                setErrorMsg(
-                  err.response?.data?.message || "Error changing password"
-                );
-              }
-            }}
-          >
-            Update Password
-          </Button>
-
-          <Button
-            variant="outlined"
-            fullWidth
-            size="large"
-            color="error"
-            onClick={() => setIsChangePasswordOpen(false)}
-          >
-            Cancel
-          </Button>
-        </Box>
-      </Dialog>
-
       <AppBar position="fixed" color="default" sx={{ boxShadow: 1 }}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
           <Typography
@@ -678,7 +556,6 @@ const Navbar = () => {
                       </ListItem>
                     )}
 
-                    {/* Admin-specific options */}
                     {email && sessionStorage.getItem("isAdmin") === "true" && (
                       <ListItem
                         button
@@ -691,7 +568,6 @@ const Navbar = () => {
                       </ListItem>
                     )}
 
-                    {/* Non-admin user options */}
                     {email && sessionStorage.getItem("isAdmin") !== "true" && (
                       <>
                         <ListItem
@@ -703,17 +579,19 @@ const Navbar = () => {
                         >
                           <ListItemText primary="Address" />
                         </ListItem>
-
-                        <ListItem
-                          button
-                          onClick={() => {
-                            setDrawerOpen(false);
-                            setIsChangePasswordOpen(true);
-                          }}
-                        >
-                          <ListItemText primary="Change Password" />
-                        </ListItem>
                       </>
+                    )}
+
+                    {email && sessionStorage.getItem("isAdmin") !== "true" && (
+                      <ListItem
+                        button
+                        onClick={() => {
+                          setDrawerOpen(false);
+                          navigate("/my-orders");
+                        }}
+                      >
+                        <ListItemText primary="My Orders" />
+                      </ListItem>
                     )}
 
                     {email && (
@@ -817,13 +695,37 @@ const Navbar = () => {
                   sx={{
                     height: "20px",
                     width: "20px",
-                    color: "#000",
                     border: "none",
                     padding: email ? "20px" : "0",
-                    backgroundColor: email ? "#1976D2" : "transparent",
+                    backgroundColor:
+                      sessionStorage.getItem("isAdmin") === "true"
+                        ? "#2f4bd7ff"
+                        : email
+                        ? "#1976D2"
+                        : "transparent",
+                    color:
+                      sessionStorage.getItem("isAdmin") === "true"
+                        ? "#000"
+                        : "#000",
+                    fontWeight:
+                      sessionStorage.getItem("isAdmin") === "true"
+                        ? "bold"
+                        : "normal",
+                    fontFamily:
+                      sessionStorage.getItem("isAdmin") === "true"
+                        ? "revert"
+                        : "inherit",
                   }}
                 >
-                  {email ? email.charAt(0).toUpperCase() : <AccountCircle />}
+                  {email ? (
+                    sessionStorage.getItem("isAdmin") === "true" ? (
+                      "A"
+                    ) : (
+                      email.charAt(0).toUpperCase()
+                    )
+                  ) : (
+                    <AccountCircle />
+                  )}
                 </Avatar>
               </IconButton>
 
@@ -886,10 +788,10 @@ const Navbar = () => {
                   <MenuItem
                     onClick={() => {
                       handleCloseMenu();
-                      setIsChangePasswordOpen(true);
+                      navigate("/my-orders");
                     }}
                   >
-                    Change Password
+                    My Orders
                   </MenuItem>
                 )}
                 {email ? (

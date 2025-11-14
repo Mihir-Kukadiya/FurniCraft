@@ -2,7 +2,10 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 const FavoritesContext = createContext();
 
-export const FavoritesProvider = ({ children }) => {
+const FavoritesProvider = ({ children }) => {
+
+  // ========================= manage favorite items =========================
+
   const email = sessionStorage.getItem("email");
   const storageKey = email ? `favorites_${email}` : "favorites_guest";
 
@@ -11,11 +14,13 @@ export const FavoritesProvider = ({ children }) => {
     return savedFavorites ? JSON.parse(savedFavorites) : [];
   });
 
-  const [message, setMessage] = useState("");
-
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(favorites));
   }, [favorites, storageKey]);
+
+  // ========================= add OR remove favorite items =========================
+
+  const [message, setMessage] = useState("");
 
   const toggleFavorite = (product) => {
     setFavorites((prev) => {
@@ -41,6 +46,8 @@ export const FavoritesProvider = ({ children }) => {
     setTimeout(() => setMessage(""), 2000);
   };
 
+  // ====================================================================
+
   return (
     <FavoritesContext.Provider
       value={{ favorites, toggleFavorite, isFavorite, removeFavorite, message }}
@@ -51,3 +58,4 @@ export const FavoritesProvider = ({ children }) => {
 };
 
 export const useFavorites = () => useContext(FavoritesContext);
+export default FavoritesProvider;

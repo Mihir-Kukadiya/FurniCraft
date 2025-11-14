@@ -69,7 +69,12 @@ export const loginUser = async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       token,
-      user: { id: user._id, email: user.email },
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+      },
     });
   } catch (err) {
     console.error("Login error:", err);
@@ -106,4 +111,3 @@ export const changePassword = async (req, res) => {
     res.status(500).json({ message: "Error changing password", error });
   }
 };
-

@@ -1,9 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Box, TextField, Button, Typography } from "@mui/material";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Dialog,
+  DialogContent,
+  Alert,
+} from "@mui/material";
 import axios from "axios";
-import { FaEye } from "react-icons/fa";
-import { FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Joi from "joi";
 
 const Login = () => {
@@ -22,7 +29,7 @@ const Login = () => {
     }),
   });
 
-  // ======================= submit =============================
+  // ======================= login =============================
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -43,14 +50,17 @@ const Login = () => {
     }
 
     axios
-      .post("http://localhost:3000/api/auth/login", {
-        email,
-        password,
-      })
+      .post("http://localhost:3000/api/auth/login", { email, password })
       .then((res) => {
+        const user = res.data.user;
+
         sessionStorage.setItem("token", res.data.token);
-        sessionStorage.setItem("email", email);
-        sessionStorage.setItem("password", password);
+        sessionStorage.setItem("email", user.email);
+        sessionStorage.setItem("password", user.password);
+
+        sessionStorage.setItem("firstName", user.firstName);
+        sessionStorage.setItem("lastName", user.lastName);
+
         navigate("/");
       })
       .catch((err) => {
@@ -63,15 +73,72 @@ const Login = () => {
   // ======================= eye icon =============================
 
   const [showPassword, setShowPassword] = useState(false);
-
   const handlePasswordClick = () => setShowPassword((prev) => !prev);
+
+  // ======================= forgot password =============================
+
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [securityAnswer, setSecurityAnswer] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [forgotMessage, setForgotMessage] = useState("");
+  const [severity, setSeverity] = useState("info");
+
+  const handleForgotPassword = async () => {
+    if (!forgotEmail || !securityAnswer || !newPassword) {
+      setForgotMessage("Please fill all fields");
+      setSeverity("warning");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/api/auth/change-password",
+        {
+          email: forgotEmail,
+          securityQuestion,
+          securityAnswer,
+          newPassword,
+        }
+      );
+
+      setForgotMessage(res.data.message || "Password updated successfully");
+      setSeverity("success");
+
+      setTimeout(() => {
+        setForgotOpen(false);
+        setForgotEmail("");
+        setSecurityAnswer("");
+        setNewPassword("");
+        setForgotMessage("");
+      }, 2000);
+    } catch (err) {
+      setForgotMessage(
+        err.response?.data?.message || "Failed to reset password"
+      );
+      setSeverity("error");
+    }
+  };
+
+  // ======================= fetch security question from Register =============================
+
+  const [securityQuestion, setSecurityQuestion] = useState("");
+
+  const handleForgotEmailChange = (e) => {
+    const emailInput = e.target.value;
+    setForgotEmail(emailInput);
+
+    const savedQuestion =
+      localStorage.getItem(`securityQuestion_${emailInput}`) || "";
+    setSecurityQuestion(savedQuestion);
+  };
 
   // ==============================================================
 
   return (
     <Box
       sx={{
-        minHeight: "100vh", 
+        minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -128,6 +195,7 @@ const Login = () => {
 
         <Box sx={{ position: "relative" }}>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>Password</Typography>
+
           <TextField
             type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
@@ -141,6 +209,7 @@ const Login = () => {
               },
             }}
           />
+
           <Box
             onClick={handlePasswordClick}
             sx={{
@@ -154,6 +223,25 @@ const Login = () => {
           >
             {showPassword ? <FaEye /> : <FaEyeSlash />}
           </Box>
+
+          <Button
+            onClick={() => setForgotOpen(true)}
+            sx={{
+              textTransform: "none",
+              color: "#2d79f3",
+              fontWeight: 500,
+              fontSize: "15px",
+              px: 0,
+              ml: "auto",
+              display: "block",
+              "&:hover": {
+                backgroundColor: "transparent",
+                textDecoration: "underline",
+              },
+            }}
+          >
+            Forgot Password?
+          </Button>
         </Box>
 
         <Button
@@ -166,7 +254,6 @@ const Login = () => {
             textTransform: "none",
             fontWeight: 500,
             fontSize: "15px",
-            mt: 1,
             "&:hover": {
               backgroundColor: "#000",
             },
@@ -192,6 +279,90 @@ const Login = () => {
           Register
         </Button>
       </Box>
+
+      <Dialog
+        open={forgotOpen}
+        onClose={() => setForgotOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: "hidden",
+            boxShadow: 5,
+            backgroundColor: "#f9f9f9",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
+            color: "#fff",
+            p: 3,
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h5">Change Password</Typography>
+        </Box>
+
+        <DialogContent sx={{ p: 3 }}>
+          <Box display="flex" flexDirection="column" gap={2}>
+            {forgotMessage && (
+              <Alert severity={severity}>{forgotMessage}</Alert>
+            )}
+
+            <TextField
+              label="Registered Email"
+              type="email"
+              value={forgotEmail}
+              onChange={handleForgotEmailChange}
+              fullWidth
+            />
+
+            <TextField
+              label="Security Question"
+              value={securityQuestion}
+              disabled
+              fullWidth
+              sx={{ backgroundColor: "#f0f0f0" }}
+            />
+
+            <TextField
+              label="Security Answer"
+              placeholder="Enter your security answer"
+              value={securityAnswer}
+              onChange={(e) => setSecurityAnswer(e.target.value)}
+              fullWidth
+            />
+
+            <TextField
+              label="New Password"
+              type="password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              fullWidth
+            />
+
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleForgotPassword}
+              fullWidth
+            >
+              Reset Password
+            </Button>
+
+            <Button
+              variant="outlined"
+              color="error"
+              onClick={() => setForgotOpen(false)}
+              fullWidth
+            >
+              Cancel
+            </Button>
+          </Box>
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 };

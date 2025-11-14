@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Typography,
-  Divider,
-  Link as MuiLink,
-} from "@mui/material";
+import { Box, Typography, Divider, Link as MuiLink } from "@mui/material";
 import {
   Facebook,
   Instagram,
@@ -17,38 +12,48 @@ import {
   Gavel,
 } from "@mui/icons-material";
 import { FaXTwitter } from "react-icons/fa6";
-
 import { useLocation, useNavigate } from "react-router-dom";
 
-const navItems = [
-  { label: "Home", href: "#home" },
-  { label: "Products", href: "#products" },
-  { label: "Expensive", href: "#expensive" },
-  { label: "About Us", href: "#about" },
-  { label: "Contact Us", href: "#contact" },
-  { label: "Login", href: "#login" },
-];
-
-const customerSupport = [
-  { icon: <HelpOutline />, label: "FAQs", href: "#home" },
-  { icon: <Policy />, label: "Return Policy", href: "#home" },
-  { icon: <Gavel />, label: "Terms & Conditions", href: "#home" },
-];
-
-const contactUs = [
-  { icon: <LocationOn />, label: "Surat, Gujarat, India" },
-  { icon: <Email />, label: "mkukadiya001@gmail.com" },
-  { icon: <Phone />, label: "+91 79908 56214" },
-];
-
-const socialIcons = [
-  { icon: <Facebook />, link: "https://www.facebook.com" },
-  { icon: <Instagram />, link: "https://www.instagram.com" },
-  { icon: <FaXTwitter />, link: "https://www.twitter.com" },
-  { icon: <LinkedIn />, link: "https://www.linkedin.com" },
-];
-
 const Footer = () => {
+
+  // ============================== Navigation Items ===============================
+
+  const navItems = [
+    { label: "Home", href: "#home" },
+    { label: "Products", href: "#products" },
+    { label: "Expensive", href: "#expensive" },
+    { label: "About Us", href: "#about" },
+    { label: "Contact Us", href: "#contact" },
+    { label: "Login", href: "#login" },
+  ];
+
+  // ============================== Customer Support ===============================
+
+  const customerSupport = [
+    { icon: <HelpOutline />, label: "FAQs", href: "#home" },
+    { icon: <Policy />, label: "Return Policy", href: "#home" },
+    { icon: <Gavel />, label: "Terms & Conditions", href: "#home" },
+  ];
+
+  // ============================== Contact Us ===============================
+
+  const contactUs = [
+    { icon: <LocationOn />, label: "Surat, Gujarat, India" },
+    { icon: <Email />, label: "mkukadiya001@gmail.com" },
+    { icon: <Phone />, label: "+91 79908 56214" },
+  ];
+
+  // ============================== Social Icons ===============================
+
+  const socialIcons = [
+    { icon: <Facebook />, link: "https://www.facebook.com" },
+    { icon: <Instagram />, link: "https://www.instagram.com" },
+    { icon: <FaXTwitter />, link: "https://www.twitter.com" },
+    { icon: <LinkedIn />, link: "https://www.linkedin.com" },
+  ];
+
+  // ================================ click nav items ===============================
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -73,6 +78,8 @@ const Footer = () => {
       }
     }
   };
+
+  // =======================================================================
 
   return (
     <Box

@@ -22,7 +22,7 @@ import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 const AboutUs = () => {
   // ========================== our goals ===============================
 
-  const values = [
+  const goals = [
     {
       title: "Our Mission",
       description:
@@ -147,8 +147,8 @@ const AboutUs = () => {
           {(() => {
             const cardsPerRow = 4;
             const rows = [];
-            for (let i = 0; i < values.length; i += cardsPerRow) {
-              rows.push(values.slice(i, i + cardsPerRow));
+            for (let i = 0; i < goals.length; i += cardsPerRow) {
+              rows.push(goals.slice(i, i + cardsPerRow));
             }
 
             return rows.map((row, rowIndex) => (

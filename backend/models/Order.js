@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 
 const orderSchema = new mongoose.Schema(
   {
-    userEmail: {
+    customerName: {
+      type: String,
+      required: true,
+    },
+    customerEmail: {
       type: String,
       required: true,
       lowercase: true,
@@ -20,9 +24,9 @@ const orderSchema = new mongoose.Schema(
           required: true,
           match: [/^[A-Za-z\s]+$/, "Name must contain only letters and spaces"],
         },
-        price: Number,
-        quantity: Number,
-        image: String,
+        price: { type: Number, required: true },
+        quantity: { type: Number, required: true, default: 1 },
+        image: { type: String },
       },
     ],
     total: { type: Number, required: true },
@@ -38,8 +42,8 @@ const orderSchema = new mongoose.Schema(
     status: {
       type: String,
       enum: {
-        values: ["Pending", "Approved", "Rejected"],
-        message: "Status must be in 'Pending', 'Approved' or 'Rejected'",
+        values: ["Pending", "Completed"],
+        message: "Status must be one of: 'Pending', or 'Completed'",
       },
       default: "Pending",
     },

@@ -64,7 +64,7 @@ const Register = () => {
     }),
   });
 
-  // ======================= states =============================
+  // ======================= input fields =============================
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -75,6 +75,8 @@ const Register = () => {
   const [answer, setAnswer] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  // ========================= submit form ============================
 
   const handleSubmit = () => {
     setError("");
@@ -107,21 +109,16 @@ const Register = () => {
         securityAnswer: answer,
       })
       .then(() => {
-        // keep existing session behavior
-        sessionStorage.setItem("email", email);
-        sessionStorage.setItem("password", password);
-
-        // store security question/answer per user
-        sessionStorage.setItem(`securityQuestion_${email}`, securityQuestion);
-        sessionStorage.setItem(`securityAnswer_${email}`, answer);
-
-        // Persist security Q/A per user across browser close/open
         localStorage.setItem(`securityQuestion_${email}`, securityQuestion);
         localStorage.setItem(`securityAnswer_${email}`, answer);
 
+        sessionStorage.clear();
+
+        sessionStorage.setItem("firstName", firstName);
+        sessionStorage.setItem("lastName", lastName);
+
         navigate("/login");
       })
-
       .catch((err) => {
         const msg = err.response?.data?.message;
         if (msg?.includes("User already exists")) {
@@ -185,7 +182,6 @@ const Register = () => {
           </Box>
         )}
 
-        {/* First Name */}
         <Box>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>First Name</Typography>
           <TextField
@@ -199,7 +195,6 @@ const Register = () => {
           />
         </Box>
 
-        {/* Last Name */}
         <Box>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>Last Name</Typography>
           <TextField
@@ -213,7 +208,6 @@ const Register = () => {
           />
         </Box>
 
-        {/* Email */}
         <Box>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>Email</Typography>
           <TextField
@@ -227,7 +221,6 @@ const Register = () => {
           />
         </Box>
 
-        {/* Password */}
         <Box sx={{ position: "relative" }}>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>Password</Typography>
           <TextField
@@ -255,7 +248,6 @@ const Register = () => {
           </Box>
         </Box>
 
-        {/* Confirm Password */}
         <Box sx={{ position: "relative" }}>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>
             Confirm Password
@@ -285,7 +277,6 @@ const Register = () => {
           </Box>
         </Box>
 
-        {/* Security Question */}
         <Box>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>
             Security Question
@@ -311,7 +302,6 @@ const Register = () => {
           </FormControl>
         </Box>
 
-        {/* Answer */}
         <Box>
           <Typography sx={{ fontWeight: 600, mb: 1 }}>
             Answer (For Security Question)
@@ -327,7 +317,6 @@ const Register = () => {
           />
         </Box>
 
-        {/* Sign Up */}
         <Button
           onClick={handleSubmit}
           sx={{
@@ -346,7 +335,6 @@ const Register = () => {
           Sign Up
         </Button>
 
-        {/* Go Back */}
         <Button
           onClick={() => navigate("/login")}
           sx={{

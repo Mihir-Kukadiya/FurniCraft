@@ -11,6 +11,5 @@ mongodb+srv://<username>:<password>@<cluster-url>/<database>?retryWrites=true&w=
 
 ================ future fixes =================
 
-1. remove all comments from all files.
-2. adjust code.
-3. check website is working properly in responsive also.
+1. check website is working properly in responsive also.
+2. check customer name is showing in order page, complete orders page and my orders page.

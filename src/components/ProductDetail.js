@@ -13,7 +13,10 @@ import {
   Alert,
 } from "@mui/material";
 import { Favorite, FavoriteBorder } from "@mui/icons-material";
-import ReactImageMagnify from "react-image-magnify";
+
+// ⭐ New zoom library (React19 supported)
+import Zoom from "react-medium-image-zoom";
+import "react-medium-image-zoom/dist/styles.css";
 
 const ProductDetail = ({
   open,
@@ -26,6 +29,7 @@ const ProductDetail = ({
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState("info");
   const [openSnackbar, setOpenSnackbar] = useState(false);
+
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
   if (!product) return null;
@@ -93,16 +97,13 @@ const ProductDetail = ({
           },
         }}
       >
-        <DialogContent
-          sx={{
-            padding: "20px 20px 0 20px",
-          }}
-        >
+        <DialogContent sx={{ padding: "20px 20px 0 20px" }}>
           <Box
             display="flex"
             gap={4}
             flexDirection={{ xs: "column", md: "row" }}
           >
+            {/* ===================== IMAGE + ZOOM ===================== */}
             <Box
               sx={{
                 width: { xs: "100%", md: "550px" },
@@ -112,27 +113,21 @@ const ProductDetail = ({
                 zIndex: 2,
               }}
             >
-              <ReactImageMagnify
-                {...{
-                  smallImage: {
-                    alt: product.name,
-                    isFluidWidth: true,
-                    src: product.img,
-                  },
-                  largeImage: {
-                    src: product.img,
-                    width: 1200,
-                    height: 1800,
-                  },
-                  enlargedImageContainerStyle: {
-                    zIndex: 999,
-                    background: "#fff",
-                  },
-                  isHintEnabled: true,
-                }}
-              />
+              <Zoom>
+                <img
+                  src={product.img}
+                  alt={product.name}
+                  style={{
+                    width: "100%",
+                    height: "auto",
+                    borderRadius: "10px",
+                    cursor: "zoom-in",
+                  }}
+                />
+              </Zoom>
             </Box>
 
+            {/* ===================== DETAILS ===================== */}
             <Box flex={1} position="relative">
               <IconButton
                 onClick={handleToggleFavorite}
@@ -146,6 +141,7 @@ const ProductDetail = ({
               >
                 {favorited ? <Favorite /> : <FavoriteBorder />}
               </IconButton>
+
               <DialogTitle
                 sx={{
                   display: "flex",
@@ -159,8 +155,12 @@ const ProductDetail = ({
               >
                 {product.name}
               </DialogTitle>
+
               <Typography variant="h6" gutterBottom sx={{ pt: "10px" }}>
-                Price: ₹{Number(product.price).toLocaleString("en-IN")}
+                Price: ₹
+                {Number(
+                  String(product.price).replace(/[^0-9.]/g, "")
+                ).toLocaleString("en-IN")}
               </Typography>
 
               <Typography
@@ -191,13 +191,7 @@ const ProductDetail = ({
           >
             Add to Cart
           </Button>
-          <Button
-            fullWidth
-            onClick={onClose}
-            color="error"
-            variant="outlined"
-            className="m-0"
-          >
+          <Button fullWidth onClick={onClose} color="error" variant="outlined">
             Close
           </Button>
         </DialogActions>

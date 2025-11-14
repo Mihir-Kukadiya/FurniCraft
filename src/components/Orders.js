@@ -15,16 +15,22 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import Swal from "sweetalert2";
+import { useNavigate } from "react-router-dom";
 
 const Orders = () => {
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
 
+  // ======================= fetch orders from backend =======================
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const res = await axios.get("http://localhost:3000/api/orders");
-        setOrders(res.data);
-        localStorage.setItem("orders", JSON.stringify(res.data));
+        const pendingOrders = res.data.filter(
+          (order) => order.status === "Pending"
+        );
+        setOrders(pendingOrders);
+        localStorage.setItem("orders", JSON.stringify(pendingOrders));
       } catch (err) {
         console.error("Failed to fetch orders:", err);
       }
@@ -33,28 +39,26 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  const updateStatus = async (id, status) => {
-  try {
-    const res = await axios.put(
-      `http://localhost:3000/api/orders/${id}/status`,
-      { status }
-    );
+  // ======================= update order status [ Complete ] =======================
 
-    const updatedOrders = orders.map((o) =>
-      o._id === id ? res.data : o // only check _id
-    );
+  const markAsCompleted = async (id) => {
+    try {
+      await axios.put(`http://localhost:3000/api/orders/${id}/status`, {
+        status: "Completed",
+      });
 
-    setOrders(updatedOrders);
-    localStorage.setItem("orders", JSON.stringify(updatedOrders));
+      const updatedOrders = orders.filter((o) => o._id !== id);
+      setOrders(updatedOrders);
+      localStorage.setItem("orders", JSON.stringify(updatedOrders));
 
-    Swal.fire("Updated!", `Order status changed to ${status}.`, "success");
-  } catch (error) {
-    console.error("Failed to update order status:", error);
-    Swal.fire("Error", "Failed to update order status.", "error");
-  }
-};
+      Swal.fire("Updated!", "Order marked as Completed.", "success");
+    } catch (error) {
+      console.error("Failed to mark order as completed:", error);
+      Swal.fire("Error", "Failed to mark order as completed.", "error");
+    }
+  };
 
-
+  // ======================= delete order =======================
   const deleteOrder = async (id) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -69,19 +73,9 @@ const Orders = () => {
     if (!result.isConfirmed) return;
 
     try {
-      const mongoId = id.startsWith("temp-") ? null : id;
-      if (!mongoId) {
-        Swal.fire(
-          "Error",
-          "This order only exists in localStorage, not in DB.",
-          "error"
-        );
-        return;
-      }
+      await axios.delete(`http://localhost:3000/api/orders/${id}`);
 
-      await axios.delete(`http://localhost:3000/api/orders/${mongoId}`);
-
-      const filtered = orders.filter((o) => o._id !== mongoId);
+      const filtered = orders.filter((o) => o._id !== id);
       setOrders(filtered);
       localStorage.setItem("orders", JSON.stringify(filtered));
 
@@ -95,35 +89,10 @@ const Orders = () => {
     }
   };
 
-  const clearAllOrders = async () => {
-    const result = await Swal.fire({
-      title: "Clear All Orders?",
-      text: "This will remove all orders permanently from DB!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#d33",
-      cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, clear all!",
-    });
-
-    if (!result.isConfirmed) return;
-
-    try {
-      await axios.delete("http://localhost:3000/api/orders/clear-all");
-
-      // ✅ Re-fetch from DB after deletion
-      const res = await axios.get("http://localhost:3000/api/orders");
-      setOrders(res.data);
-      localStorage.setItem("orders", JSON.stringify(res.data));
-
-      Swal.fire("Cleared!", "All orders have been removed.", "success");
-    } catch (error) {
-      console.error("Failed to clear orders:", error);
-      Swal.fire("Error", "Failed to clear orders from server.", "error");
-    }
-  };
+  // =======================================================================
 
   return (
+    
     <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, mt: { xs: 6, md: 8 } }}>
       <Typography
         variant="h4"
@@ -135,21 +104,31 @@ const Orders = () => {
           paddingTop: { xs: "30px", md: "0px" },
         }}
       >
-        Orders Management
+        Pending Orders
       </Typography>
       <Divider sx={{ mb: 2 }} />
 
-      {/* ✅ Clear All Orders Button */}
-      {orders.length > 0 && (
-        <Box sx={{ textAlign: "right", mb: 2 }}>
-          <Button variant="contained" color="error" onClick={clearAllOrders}>
-            Clear All Orders
-          </Button>
-        </Box>
-      )}
+      <Box
+        sx={{
+          textAlign: { xs: "center", sm: "right" },
+          mb: 2,
+        }}
+      >
+        <Button
+          variant="contained"
+          color="success"
+          onClick={() => navigate("/completed-orders")}
+          sx={{
+            width: { xs: "100%", sm: "auto" },
+            maxWidth: "200px",
+          }}
+        >
+          Completed Orders
+        </Button>
+      </Box>
 
       {orders.length === 0 ? (
-        <Typography textAlign="center">No orders found.</Typography>
+        <Typography textAlign="center">No pending orders found.</Typography>
       ) : (
         <Box sx={{ width: "100%", overflowX: "auto" }}>
           <TableContainer component={Card} sx={{ minWidth: 650 }}>
@@ -160,7 +139,10 @@ const Orders = () => {
                     <b>Order ID</b>
                   </TableCell>
                   <TableCell>
-                    <b>User</b>
+                    <b>Customer Name</b>
+                  </TableCell>
+                  <TableCell>
+                    <b>Customer Email</b>
                   </TableCell>
                   <TableCell>
                     <b>Items</b>
@@ -179,11 +161,12 @@ const Orders = () => {
               <TableBody>
                 {orders.map((order) => (
                   <TableRow
-                    key={order.id || order._id}
+                    key={order._id}
                     sx={{ "& td": { wordBreak: "break-word" } }}
                   >
-                    <TableCell>{order.id || order._id}</TableCell>
-                    <TableCell>{order.userEmail}</TableCell>
+                    <TableCell>{order._id}</TableCell>
+                    <TableCell>{order.customerName}</TableCell>
+                    <TableCell>{order.customerEmail}</TableCell>
                     <TableCell>
                       {order.items.map((i) => (
                         <div key={i.name}>
@@ -197,46 +180,35 @@ const Orders = () => {
                       <Stack
                         direction={{ xs: "column", sm: "row" }}
                         spacing={1}
-                        alignItems="flex-start"
+                        alignItems="stretch"
+                        sx={{ minWidth: 120 }}
                       >
                         <Button
                           size="small"
                           variant="contained"
                           sx={{
-                            backgroundColor: "#198754",
-                            "&:hover": { backgroundColor: "#157347" },
+                            backgroundColor: "#0d6efd",
+                            "&:hover": { backgroundColor: "#0b5ed7" },
+                            whiteSpace: "nowrap",
+                            flex: 1,
+                            minWidth: "90px",
                           }}
-                          onClick={() =>
-                            updateStatus(order.id || order._id, "Approved")
-                          }
-                          fullWidth
+                          onClick={() => markAsCompleted(order._id)}
                         >
-                          Approve
+                          Complete
                         </Button>
 
                         <Button
                           size="small"
                           variant="contained"
                           sx={{
-                            backgroundColor: "#dc3545",
-                            "&:hover": { backgroundColor: "#bb2d3b" },
-                          }}
-                          onClick={() =>
-                            updateStatus(order.id || order._id, "Rejected")
-                          }
-                          fullWidth
-                        >
-                          Reject
-                        </Button>
-                        <Button
-                          size="small"
-                          variant="contained"
-                          sx={{
                             backgroundColor: "#6f42c1",
                             "&:hover": { backgroundColor: "#5a379b" },
+                            whiteSpace: "nowrap",
+                            flex: 1,
+                            minWidth: "90px",
                           }}
-                          onClick={() => deleteOrder(order.id || order._id)}
-                          fullWidth
+                          onClick={() => deleteOrder(order._id)}
                         >
                           Delete
                         </Button>

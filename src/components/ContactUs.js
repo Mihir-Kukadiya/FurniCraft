@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -7,11 +7,56 @@ import {
   TextField,
   Button,
 } from "@mui/material";
-import { FaPhoneAlt } from "react-icons/fa";
-import { FaHome } from "react-icons/fa";
+import { FaPhoneAlt, FaHome } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
+import emailjs from "emailjs-com";
+
+const SERVICE_ID = "service_4wh1fvm";
+const TEMPLATE_ID = "template_84029is";
+const USER_ID = "j4TLiqXB52zF5dvpD";
 
 const ContactUs = () => {
+  const formRef = useRef();
+  const [status, setStatus] = useState({
+    loading: false,
+    success: null,
+    error: null,
+  });
+
+  useEffect(() => {
+    // initialize EmailJS (optional if you always pass user id to sendForm,
+    // but it's a good explicit practice)
+    emailjs.init(USER_ID);
+  }, []);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setStatus({ loading: true, success: null, error: null });
+
+    // sendForm will serialize the form fields using the "name" attributes
+    emailjs
+      .sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, USER_ID)
+      .then(
+        (result) => {
+          console.log("Email sent:", result.text);
+          setStatus({
+            loading: false,
+            success: "Message sent successfully!",
+            error: null,
+          });
+          if (formRef.current) formRef.current.reset();
+        },
+        (error) => {
+          console.error("Email error:", error);
+          setStatus({
+            loading: false,
+            success: null,
+            error: "Failed to send message. Try again later.",
+          });
+        }
+      );
+  };
+
   return (
     <Box
       id="contact"
@@ -43,6 +88,7 @@ const ContactUs = () => {
         </Typography>
       </Box>
 
+      {/* Main Container */}
       <Container
         maxWidth={false}
         disableGutters
@@ -83,7 +129,12 @@ const ContactUs = () => {
           }}
         >
           <Box sx={{ width: { xs: "100%", md: "48%" } }}>
-            <Card sx={{ p: { xs: 2, sm: 4 }, borderRadius: 3, boxShadow: 3 }}>
+            <Card
+              sx={{ p: { xs: 2, sm: 4 }, borderRadius: 3, boxShadow: 3 }}
+              component="form"
+              ref={formRef}
+              onSubmit={handleSubmit}
+            >
               <Typography
                 variant="h6"
                 fontWeight="bold"
@@ -92,23 +143,56 @@ const ContactUs = () => {
               >
                 Send Us a Message
               </Typography>
-              <TextField fullWidth label="Name" margin="normal" />
-              <TextField fullWidth label="Email" margin="normal" />
-              <TextField fullWidth label="Subject" margin="normal" />
+
+              <TextField
+                fullWidth
+                label="Name"
+                name="name"
+                margin="normal"
+                required
+              />
+              <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                margin="normal"
+                required
+              />
+              <TextField
+                fullWidth
+                label="Title"
+                name="title"
+                margin="normal"
+              />
               <TextField
                 fullWidth
                 label="Message"
+                name="message"
                 margin="normal"
                 multiline
                 rows={4}
+                required
               />
               <Button
+                type="submit"
                 variant="contained"
                 color="primary"
                 sx={{ mt: 2, borderRadius: 2 }}
+                disabled={status.loading}
               >
-                Submit
+                {status.loading ? "Sending..." : "Submit"}
               </Button>
+
+              {status.success && (
+                <Typography color="green" sx={{ mt: 2 }}>
+                  {status.success}
+                </Typography>
+              )}
+              {status.error && (
+                <Typography color="red" sx={{ mt: 2 }}>
+                  {status.error}
+                </Typography>
+              )}
             </Card>
           </Box>
 

@@ -23,9 +23,13 @@ import { useCart } from "./CartProvider";
 import { useNavigate } from "react-router-dom";
 
 const Payment = () => {
+  // ======================== cart items =======================
+
   const { cartItems, clearCart } = useCart();
   const navigate = useNavigate();
-  const [paymentMethod, setPaymentMethod] = useState("gpay");
+  const [paymentMethod, setPaymentMethod] = useState("upi");
+
+  // ======================== banks list =======================
 
   const banks = [
     "State Bank of India",
@@ -40,24 +44,31 @@ const Payment = () => {
     "IndusInd Bank",
   ];
 
+  // ======================== payment methods =======================
+
   const [cardDetails, setCardDetails] = useState({
     number: "",
     expiry: "",
     cvv: "",
   });
+
   const [upiId, setUpiId] = useState("");
+
   const [netBanking, setNetBanking] = useState({
     bankName: "",
     accountNumber: "",
   });
+
+  // ======================== address management =======================
+
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState("");
 
   useEffect(() => {
-    const userEmail = sessionStorage.getItem("email");
-    if (!userEmail) return;
+    const customerEmail = sessionStorage.getItem("email");
+    if (!customerEmail) return;
 
-    const stored = localStorage.getItem(`addresses_${userEmail}`);
+    const stored = localStorage.getItem(`addresses_${customerEmail}`);
     const parsedAddresses = stored ? JSON.parse(stored) : [];
     setAddresses(parsedAddresses);
 
@@ -67,8 +78,10 @@ const Payment = () => {
       );
     }
 
-    setPaymentMethod("gpay");
+    setPaymentMethod("upi");
   }, []);
+
+  // ======================== price calculations =======================
 
   const getNumericPrice = (item) => {
     if (typeof item.price === "number") return item.price;
@@ -91,6 +104,8 @@ const Payment = () => {
   const igst = 0;
   const total = subtotal - discount + cgst + sgst + igst + shipping;
 
+  // ======================== place order =======================
+
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
       Swal.fire(
@@ -101,7 +116,7 @@ const Payment = () => {
       return;
     }
 
-    if (paymentMethod === "gpay" && !upiId) {
+    if (paymentMethod === "upi" && !upiId) {
       Swal.fire("Missing Details", "Please enter your UPI ID.", "error");
       return;
     }
@@ -122,14 +137,22 @@ const Payment = () => {
       return;
     }
 
-    const userEmail = sessionStorage.getItem("email");
-    if (!userEmail) {
+    const customerEmail = sessionStorage.getItem("email");
+    if (!customerEmail) {
       Swal.fire("Not Logged In", "Please login to place an order.", "error");
       return;
     }
 
+    // ============================== new order ==============================
+
+    const firstName = sessionStorage.getItem("firstName");
+    const lastName = sessionStorage.getItem("lastName");
+    const fullName =
+    firstName && lastName ? `${firstName} ${lastName}` : "Unknown";
+      
     const newOrder = {
-      userEmail,
+      customerName: fullName,
+      customerEmail: customerEmail,
       items: cartItems.map((item) => ({
         productId: item._id || null,
         name: item.name,
@@ -170,6 +193,8 @@ const Payment = () => {
     }
   };
 
+  // ==============================================================================
+
   return (
     <Box sx={{ p: { xs: 2, md: 3 }, gap: 3 }}>
       <Box
@@ -182,7 +207,6 @@ const Payment = () => {
           pb: 3,
         }}
       >
-        {/* Address Section */}
         <Box
           sx={{ flex: { xs: "1 1 100%", md: "1 1 48%" }, minWidth: "280px" }}
         >
@@ -259,7 +283,6 @@ const Payment = () => {
           </Card>
         </Box>
 
-        {/* Payment Section */}
         <Box
           sx={{ flex: { xs: "1 1 100%", md: "1 1 48%" }, minWidth: "280px" }}
         >
@@ -274,7 +297,7 @@ const Payment = () => {
               onChange={(e) => setPaymentMethod(e.target.value)}
             >
               <FormControlLabel
-                value="gpay"
+                value="upi"
                 control={<Radio />}
                 label="Google Pay / UPI"
               />
@@ -295,8 +318,7 @@ const Payment = () => {
               />
             </RadioGroup>
 
-            {/* ✅ UPI Fields */}
-            {paymentMethod === "gpay" && (
+            {paymentMethod === "upi" && (
               <Box sx={{ mt: 2 }}>
                 <TextField
                   fullWidth
@@ -309,7 +331,6 @@ const Payment = () => {
               </Box>
             )}
 
-            {/* ✅ Net Banking Fields */}
             {paymentMethod === "netbanking" && (
               <Box sx={{ mt: 2 }}>
                 <FormControl fullWidth variant="standard" margin="dense">
@@ -344,7 +365,6 @@ const Payment = () => {
               </Box>
             )}
 
-            {/* ✅ Card Fields */}
             {paymentMethod === "card" && (
               <Box sx={{ mt: 2 }}>
                 <TextField
@@ -384,9 +404,12 @@ const Payment = () => {
         </Box>
       </Box>
 
-      {/* Order Summary */}
-      <Card sx={{ p: 3, boxShadow: 4, borderRadius: 3, bgcolor: "#fafafa", mt: 3 }}>
-        <Typography variant="h5" gutterBottom fontWeight="bold">Order Summary</Typography>
+      <Card
+        sx={{ p: 3, boxShadow: 4, borderRadius: 3, bgcolor: "#fafafa", mt: 3 }}
+      >
+        <Typography variant="h5" gutterBottom fontWeight="bold">
+          Order Summary
+        </Typography>
         <Divider sx={{ mb: 2 }} />
 
         {cartItems.length === 0 ? (
@@ -395,19 +418,45 @@ const Payment = () => {
           <>
             <List sx={{ maxHeight: 250, overflowY: "auto", mb: 2 }}>
               {cartItems.map((item, idx) => (
-                <ListItem key={idx} sx={{ display: "flex", alignItems: "center", mb: 1, borderBottom: "1px solid #eee", pb: 1 }}>
+                <ListItem
+                  key={idx}
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: 1,
+                    borderBottom: "1px solid #eee",
+                    pb: 1,
+                  }}
+                >
                   {(item.image || item.img) && (
-                    <Box component="img" src={item.image || item.img} alt={item.name} sx={{ width: 60, height: 60, borderRadius: 1, mr: 2, objectFit: "cover" }} />
+                    <Box
+                      component="img"
+                      src={item.image || item.img}
+                      alt={item.name}
+                      sx={{
+                        width: 60,
+                        height: 60,
+                        borderRadius: 1,
+                        mr: 2,
+                        objectFit: "cover",
+                      }}
+                    />
                   )}
 
                   <ListItemText
                     primary={item.name}
                     secondary={`Qty: ${item.quantity || 1}`}
                     primaryTypographyProps={{ fontWeight: "500", fontSize: 15 }}
-                    secondaryTypographyProps={{ fontSize: 13, color: "text.secondary" }}
+                    secondaryTypographyProps={{
+                      fontSize: 13,
+                      color: "text.secondary",
+                    }}
                   />
 
-                  <Typography fontWeight="bold" sx={{ minWidth: 70, textAlign: "right" }}>
+                  <Typography
+                    fontWeight="bold"
+                    sx={{ minWidth: 70, textAlign: "right" }}
+                  >
                     ₹{(getNumericPrice(item) * (item.quantity || 1)).toFixed(2)}
                   </Typography>
                 </ListItem>
@@ -433,7 +482,6 @@ const Payment = () => {
                 </Typography>
               </Box>
 
-              {/* ✅ GST Split */}
               <Box
                 sx={{ display: "flex", justifyContent: "space-between", py: 1 }}
               >
