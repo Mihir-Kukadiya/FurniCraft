@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
 const CartContext = createContext();
-const API = "http://localhost:3000/api/cart";   // << Your backend route
+const API = "http://localhost:3000/api/cart";
 
 const CartProvider = ({ children }) => {
 
@@ -20,22 +20,24 @@ const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [message, setMessage] = useState("");
 
-  // 🔥 Load cart from MongoDB when user exists
   useEffect(() => {
-    if (!email) return;                  // no user → no cart fetch
+    if (!email) return;
     axios.get(`${API}/${email}`)
       .then((res) => setCartItems(res.data))
       .catch(() => setCartItems([]));
   }, [email]);
 
-  // ===================== CLEAR CART =======================
+
+  // ===================== clear cart =======================
+
   const clearCart = async () => {
-    if (!email) return setCartItems([]);   // guest cart fallback
+    if (!email) return setCartItems([]);
     await axios.delete(`${API}/clear/${email}`);
     setCartItems([]);
   };
 
-  // ===================== ADD TO CART =======================
+  // ===================== add to cart =======================
+
   const addToCart = async (product) => {
 
     const idToCheck = product._id || product.name;
@@ -49,18 +51,17 @@ const CartProvider = ({ children }) => {
 
     const normalized = {
       ...product,
-      productId: product._id,               // 🆕 required for DB
+      productId: product._id,
       price: parsePriceToNumber(product.price),
       image: product.image || product.img || product.imgUrl || "",
       quantity: 1,
     };
 
-    // 🔥 Save to MongoDB
     if (email) {
       await axios.post(`${API}/add`, { email, product: normalized })
         .then(res => setCartItems(res.data.cart));
     } else {
-      setCartItems(prev => [...prev, normalized]);  // guest fallback
+      setCartItems(prev => [...prev, normalized]);
     }
 
     setMessage("Product added to cart!");

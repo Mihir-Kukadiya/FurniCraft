@@ -1,56 +1,80 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
+import axios from "axios";
 
 const FavoritesContext = createContext();
+const API = "http://localhost:3000/api/favorites";
 
 const FavoritesProvider = ({ children }) => {
-
-  // ========================= manage favorite items =========================
-
   const email = sessionStorage.getItem("email");
-  const storageKey = email ? `favorites_${email}` : "favorites_guest";
-
-  const [favorites, setFavorites] = useState(() => {
-    const savedFavorites = localStorage.getItem(storageKey);
-    return savedFavorites ? JSON.parse(savedFavorites) : [];
-  });
-
-  useEffect(() => {
-    localStorage.setItem(storageKey, JSON.stringify(favorites));
-  }, [favorites, storageKey]);
-
-  // ========================= add OR remove favorite items =========================
-
+  const [favorites, setFavorites] = useState([]);
   const [message, setMessage] = useState("");
 
-  const toggleFavorite = (product) => {
-    setFavorites((prev) => {
-      const exists = prev.find((item) => item.name === product.name);
-      if (exists) {
-        setMessage("Product removed from favorites!");
-        return prev.filter((item) => item.name !== product.name);
-      } else {
-        setMessage("Product added to favorites!");
-        return [...prev, product];
-      }
-    });
+  useEffect(() => {
+    if (!email) return;
+    axios.get(`${API}/${email}`).then((res) => setFavorites(res.data));
+  }, [email]);
+
+  const toggleFavorite = async (product) => {
+    const formatted = {
+      productId: product._id,
+      name: product.name,
+      price: product.price,
+      image: product.img || product.image,
+    };
+
+    if (email) {
+      const res = await axios.post(`${API}/toggle`, {
+        email,
+        product: formatted,
+      });
+      setFavorites(res.data.favorites);
+      setMessage(
+        res.data.message === "added"
+          ? "Product added to favorites!"
+          : "Product removed!"
+      );
+    } else {
+      setFavorites((prev) =>
+        prev.find((i) => i.name === product.name)
+          ? prev.filter((i) => i.name !== product.name)
+          : [...prev, product]
+      );
+    }
 
     setTimeout(() => setMessage(""), 2000);
   };
 
-  const isFavorite = (product) =>
-    favorites.some((item) => item.name === product.name);
+  const isFavorite = (p) => favorites.some((i) => i.name === p.name);
 
-  const removeFavorite = (product) => {
-    setFavorites((prev) => prev.filter((item) => item.name !== product.name));
+  const removeFavorite = async (product) => {
+    if (email) {
+      const res = await axios.delete(`${API}/remove`, {
+        data: { email, productId: product._id },
+      });
+      setFavorites(res.data);
+    } else {
+      setFavorites((prev) => prev.filter((i) => i.name !== product.name));
+    }
+
     setMessage("Product removed from favorites!");
     setTimeout(() => setMessage(""), 2000);
   };
 
-  // ====================================================================
+  const clearFavorites = async () => {
+    await axios.delete(`${API}/clear/${email}`);
+    setFavorites([]);
+  };
 
   return (
     <FavoritesContext.Provider
-      value={{ favorites, toggleFavorite, isFavorite, removeFavorite, message }}
+      value={{
+        favorites,
+        toggleFavorite,
+        isFavorite,
+        removeFavorite,
+        clearFavorites,
+        message,
+      }}
     >
       {children}
     </FavoritesContext.Provider>
