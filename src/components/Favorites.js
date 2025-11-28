@@ -12,13 +12,12 @@ import { useFavorites } from "./FavoritesProvider";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 
 const Favorites = () => {
-
   // ======================== remove item from favorites ========================
 
   const { favorites, removeFavorite } = useFavorites();
 
   // ======================== parse product price ========================
-  
+
   const parsePrice = (price) => {
     if (!price) return 0;
     const priceStr = typeof price === "string" ? price : price.toString();
@@ -125,7 +124,7 @@ const Favorites = () => {
                   >
                     <CardMedia
                       component="img"
-                      image={item.img}
+                      image={item.image || item.img}
                       alt={item.name}
                       sx={{
                         objectFit: "cover",
