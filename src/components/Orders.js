@@ -59,6 +59,7 @@ const Orders = () => {
   };
 
   // ======================= delete order =======================
+
   const deleteOrder = async (id) => {
     const result = await Swal.fire({
       title: "Are you sure?",
@@ -89,10 +90,16 @@ const Orders = () => {
     }
   };
 
+  // ======================= date =======================
+
+  const formatDate = (date) => {
+    const d = new Date(date);
+    return d.toLocaleDateString("en-GB"); // DD/MM/YYYY
+  };
+
   // =======================================================================
 
   return (
-    
     <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, mt: { xs: 6, md: 8 } }}>
       <Typography
         variant="h4"
@@ -139,6 +146,10 @@ const Orders = () => {
                     <b>Order ID</b>
                   </TableCell>
                   <TableCell>
+                    <b>Date</b>
+                  </TableCell>
+
+                  <TableCell>
                     <b>Customer Name</b>
                   </TableCell>
                   <TableCell>
@@ -165,6 +176,9 @@ const Orders = () => {
                     sx={{ "& td": { wordBreak: "break-word" } }}
                   >
                     <TableCell>{order._id}</TableCell>
+                    <TableCell>
+                      {formatDate(order.createdAt || new Date())}
+                    </TableCell>
                     <TableCell>{order.customerName}</TableCell>
                     <TableCell>{order.customerEmail}</TableCell>
                     <TableCell>

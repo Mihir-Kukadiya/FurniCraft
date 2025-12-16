@@ -41,6 +41,14 @@ const CompleteOrders = () => {
     fetchCompletedOrders();
   }, []);
 
+  // ======================= date =======================
+
+  const formatDate = (date) => {
+    if (!date) return "—";
+    const d = new Date(date);
+    return d.toLocaleDateString("en-GB");
+  };
+
   return (
     <Box sx={{ p: { xs: 1, sm: 2, md: 3 }, mt: { xs: 6, md: 8 } }}>
       <Typography
@@ -88,6 +96,9 @@ const CompleteOrders = () => {
                     <b>Order ID</b>
                   </TableCell>
                   <TableCell>
+                    <b>Completed Date</b>
+                  </TableCell>
+                  <TableCell>
                     <b>Customer Name</b>
                   </TableCell>
                   <TableCell>
@@ -105,6 +116,9 @@ const CompleteOrders = () => {
                 {orders.map((order) => (
                   <TableRow key={order._id}>
                     <TableCell>{order._id}</TableCell>
+                    <TableCell>
+                      {formatDate(order.completedAt || order.updatedAt)}
+                    </TableCell>
                     <TableCell>{order.customerName}</TableCell>
                     <TableCell>{order.customerEmail}</TableCell>
                     <TableCell>
