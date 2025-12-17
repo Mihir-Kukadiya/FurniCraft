@@ -28,6 +28,15 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
 
+const DEFAULT_ADMIN = {
+  email: "mkukadiya001@gmail.com",
+  password: "Mihir@3190",
+};
+
+if (!localStorage.getItem("adminCredentials")) {
+  localStorage.setItem("adminCredentials", JSON.stringify(DEFAULT_ADMIN));
+}
+
 const Navbar = () => {
   // ========================= responsive ============================
 
@@ -123,6 +132,16 @@ const Navbar = () => {
     { label: "Login", href: "/login" },
   ];
 
+  // ============================ admin change their profile ==================================
+
+  const adminCredentials = JSON.parse(localStorage.getItem("adminCredentials"));
+
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [newAdminEmail, setNewAdminEmail] = useState(
+    adminCredentials?.email || ""
+  );
+  const [newAdminPassword, setNewAdminPassword] = useState("");
+
   // ==============================================================
 
   return (
@@ -207,6 +226,21 @@ const Navbar = () => {
               {password ? "*".repeat(password.length) : ""}
             </Typography>
           </Box>
+          {sessionStorage.getItem("isAdmin") === "true" && (
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{ mb: 2 }}
+              onClick={() => {
+                setNewAdminEmail(adminCredentials?.email || "");
+                setNewAdminPassword(adminCredentials?.password || "");
+                setIsDialogOpen(false);
+                setIsEditProfileOpen(true);
+              }}
+            >
+              Edit Profile
+            </Button>
+          )}
 
           <Button
             variant="outlined"
@@ -366,8 +400,8 @@ const Navbar = () => {
               component="a"
               onClick={() => {
                 if (
-                  adminEmail === "mkukadiya001@gmail.com" &&
-                  adminPassword === "Mihir@3190"
+                  adminEmail === adminCredentials.email &&
+                  adminPassword === adminCredentials.password
                 ) {
                   sessionStorage.setItem("email", adminEmail);
                   sessionStorage.setItem("password", adminPassword);
@@ -466,6 +500,133 @@ const Navbar = () => {
           </Box>
         </Box>
       </Dialog>
+
+      <Dialog
+  open={isEditProfileOpen}
+  onClose={() => setIsEditProfileOpen(false)}
+  maxWidth="xs"
+  fullWidth
+  PaperProps={{
+    sx: {
+      borderRadius: 3,
+      overflow: "hidden",
+      boxShadow: 5,
+      backgroundColor: "#f9f9f9",
+    },
+  }}
+>
+  {/* ===== Header (Same as My Account) ===== */}
+  <Box
+    sx={{
+      background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
+      color: "#fff",
+      p: 3,
+      textAlign: "center",
+    }}
+  >
+    <Avatar
+      sx={{
+        bgcolor: "#fff",
+        color: "#1976d2",
+        width: 80,
+        height: 80,
+        fontSize: 32,
+        mb: 2,
+        mx: "auto",
+      }}
+    >
+      A
+    </Avatar>
+
+    <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+      Edit Admin Profile
+    </Typography>
+  </Box>
+
+  {/* ===== Body ===== */}
+  <Box sx={{ p: 3 }}>
+    {/* Email */}
+    <Box sx={{ mb: 2 }}>
+      <Typography variant="subtitle2" color="textSecondary">
+        Email
+      </Typography>
+      <input
+        type="email"
+        value={newAdminEmail}
+        onChange={(e) => setNewAdminEmail(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "10px",
+          borderRadius: "4px",
+          border: "1px solid #ccc",
+        }}
+      />
+    </Box>
+
+    {/* Password */}
+    <Box sx={{ mb: 3 }}>
+      <Typography variant="subtitle2" color="textSecondary">
+        New Password
+      </Typography>
+
+      {/* hidden autofill breaker */}
+      <input
+        type="password"
+        name="password"
+        autoComplete="current-password"
+        style={{ display: "none" }}
+      />
+
+      <input
+        type="password"
+        placeholder="Enter new password"
+        value={newAdminPassword}
+        autoComplete="new-password"
+        name="new-password"
+        onChange={(e) => setNewAdminPassword(e.target.value)}
+        style={{
+          width: "100%",
+          padding: "10px",
+          borderRadius: "4px",
+          border: "1px solid #ccc",
+        }}
+      />
+    </Box>
+
+    {/* Buttons */}
+    <Button
+      variant="contained"
+      fullWidth
+      sx={{ mb: 1 }}
+      onClick={() => {
+        localStorage.setItem(
+          "adminCredentials",
+          JSON.stringify({
+            email: newAdminEmail,
+            password: newAdminPassword,
+          })
+        );
+
+        sessionStorage.clear();
+        setIsEditProfileOpen(false);
+        navigate("/login");
+        window.location.reload();
+      }}
+    >
+      Save Changes
+    </Button>
+
+    <Button
+      variant="outlined"
+      color="error"
+      fullWidth
+      onClick={() => setIsEditProfileOpen(false)}
+    >
+      Cancel
+    </Button>
+  </Box>
+</Dialog>
+
 
       <AppBar position="fixed" color="default" sx={{ boxShadow: 1 }}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -794,6 +955,7 @@ const Navbar = () => {
                     My Orders
                   </MenuItem>
                 )}
+
                 {email ? (
                   <MenuItem
                     onClick={() => {
