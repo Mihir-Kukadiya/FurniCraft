@@ -43,12 +43,12 @@ const MyOrders = () => {
   const deleteOrder = async (id) => {
     const result = await Swal.fire({
       title: "Are you sure?",
-      text: "This order will be permanently removed!",
+      text: "This order will be permanently cancelled!",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#d33",
       cancelButtonColor: "#3085d6",
-      confirmButtonText: "Yes, remove it!",
+      confirmButtonText: "Yes, cancel it!",
     });
 
     if (!result.isConfirmed) return;
@@ -57,10 +57,10 @@ const MyOrders = () => {
       await axios.delete(`http://localhost:3000/api/orders/${id}`);
       const updatedOrders = orders.filter((order) => order._id !== id);
       setOrders(updatedOrders);
-      Swal.fire("Removed!", "Your order has been removed.", "success");
+      Swal.fire("Cancelled!", "Your order has been cancelled.", "success");
     } catch (error) {
-      console.error("Failed to remove order:", error);
-      Swal.fire("Error", "Failed to remove the order.", "error");
+      console.error("Failed to cancel order:", error);
+      Swal.fire("Error", "Failed to cancel the order.", "error");
     }
   };
 
@@ -210,7 +210,7 @@ const MyOrders = () => {
                           }}
                           onClick={() => deleteOrder(order._id)}
                         >
-                          Remove
+                          Cancel
                         </Button>
                       </Stack>
                     </TableCell>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   AppBar,
   Toolbar,
@@ -27,6 +27,7 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 
 const DEFAULT_ADMIN = {
   email: "mkukadiya001@gmail.com",
@@ -142,6 +143,76 @@ const Navbar = () => {
   );
   const [newAdminPassword, setNewAdminPassword] = useState("");
 
+  // ===================== Change Profile Image ========================
+
+  const fileInputRef = useRef(null);
+  const [avatarHover, setAvatarHover] = useState(false);
+
+  // Get profile image from localStorage
+  const getProfileImage = () => {
+    const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+
+    if (isAdmin) {
+      return localStorage.getItem("adminProfileImage");
+    }
+
+    return null; // normal users always default avatar
+  };
+
+  const [profileImage, setProfileImage] = useState(getProfileImage());
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // 🚫 Block normal users
+    const isAdmin = sessionStorage.getItem("isAdmin") === "true";
+    if (!isAdmin) return;
+
+    const compressedImage = await resizeImage(file);
+
+    setProfileImage(compressedImage);
+
+    localStorage.setItem("adminProfileImage", compressedImage);
+
+    setSnackbarMessage("Admin profile image updated successfully!");
+    setSnackbarSeverity("success");
+    setOpenSnackbar(true);
+
+    event.target.value = null;
+  };
+
+  // Update profile image when it changes in localStorage
+  React.useEffect(() => {
+    setProfileImage(getProfileImage());
+  }, [email]);
+
+  const resizeImage = (file, maxSize = 200) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+
+      reader.onload = (e) => {
+        img.src = e.target.result;
+      };
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+
+        const scale = maxSize / Math.max(img.width, img.height);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        resolve(canvas.toDataURL("image/jpeg", 0.7)); // compressed
+      };
+
+      reader.readAsDataURL(file);
+    });
+  };
+
   // ==============================================================
 
   return (
@@ -168,21 +239,64 @@ const Navbar = () => {
             textAlign: "center",
           }}
         >
-          <Avatar
-            sx={{
-              bgcolor: "#fff",
-              color: "#1976d2",
-              width: 80,
-              height: 80,
-              fontSize: 32,
-              mb: 2,
-              mx: "auto",
-            }}
+          <Box
+            sx={{ position: "relative", display: "inline-block" }}
+            // onMouseEnter={() => setAvatarHover(true)}
+            // onMouseLeave={() => setAvatarHover(false)}
           >
-            {sessionStorage.getItem("isAdmin") === "true"
-              ? "A"
-              : email?.charAt(0)?.toUpperCase()}
-          </Avatar>
+            <Avatar
+              src={profileImage}
+              sx={{
+                bgcolor: "#fff",
+                color: "#1976d2",
+                width: 80,
+                height: 80,
+                fontSize: 32,
+                mb: 2,
+                mx: "auto",
+                cursor: "pointer",
+                transition: "all 0.3s ease",
+              }}
+              // onClick={handleAvatarClick}
+            >
+              {!profileImage &&
+                (sessionStorage.getItem("isAdmin") === "true"
+                  ? "A"
+                  : email?.charAt(0)?.toUpperCase())}
+            </Avatar>
+
+            {/* {avatarHover && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 80,
+                  height: 80,
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(0, 0, 0, 0.6)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                  transition: "all 0.3s ease",
+                }}
+                onClick={handleAvatarClick}
+              >
+                <CameraAltIcon sx={{ fontSize: 30, color: "#fff" }} />
+              </Box>
+            )} */}
+          </Box>
+
+          {/* <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            style={{ display: "none" }}
+          /> */}
+
           <Typography variant="h5" sx={{ fontWeight: "bold" }}>
             {sessionStorage.getItem("isAdmin") === "true"
               ? "Admin"
@@ -408,6 +522,7 @@ const Navbar = () => {
                   sessionStorage.setItem("isAdmin", "true");
                   setIsAdminDialogOpen(false);
                   setLoginError("");
+                  setProfileImage(getProfileImage());
                   navigate("/");
                 } else {
                   setLoginError("Invalid email or password");
@@ -502,128 +617,162 @@ const Navbar = () => {
       </Dialog>
 
       <Dialog
-  open={isEditProfileOpen}
-  onClose={() => setIsEditProfileOpen(false)}
-  maxWidth="xs"
-  fullWidth
-  PaperProps={{
-    sx: {
-      borderRadius: 3,
-      overflow: "hidden",
-      boxShadow: 5,
-      backgroundColor: "#f9f9f9",
-    },
-  }}
->
-  {/* ===== Header (Same as My Account) ===== */}
-  <Box
-    sx={{
-      background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
-      color: "#fff",
-      p: 3,
-      textAlign: "center",
-    }}
-  >
-    <Avatar
-      sx={{
-        bgcolor: "#fff",
-        color: "#1976d2",
-        width: 80,
-        height: 80,
-        fontSize: 32,
-        mb: 2,
-        mx: "auto",
-      }}
-    >
-      A
-    </Avatar>
-
-    <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-      Edit Admin Profile
-    </Typography>
-  </Box>
-
-  {/* ===== Body ===== */}
-  <Box sx={{ p: 3 }}>
-    {/* Email */}
-    <Box sx={{ mb: 2 }}>
-      <Typography variant="subtitle2" color="textSecondary">
-        Email
-      </Typography>
-      <input
-        type="email"
-        value={newAdminEmail}
-        onChange={(e) => setNewAdminEmail(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "10px",
-          borderRadius: "4px",
-          border: "1px solid #ccc",
+        open={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 3,
+            overflow: "hidden",
+            boxShadow: 5,
+            backgroundColor: "#f9f9f9",
+          },
         }}
-      />
-    </Box>
+      >
+        <Box
+          sx={{
+            background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
+            color: "#fff",
+            p: 3,
+            textAlign: "center",
+          }}
+        >
+          <Box
+            sx={{ position: "relative", display: "inline-block" }}
+            onMouseEnter={() => setAvatarHover(true)}
+            onMouseLeave={() => setAvatarHover(false)}
+          >
+            <Avatar
+              src={profileImage}
+              sx={{
+                bgcolor: "#fff",
+                color: "#1976d2",
+                width: 80,
+                height: 80,
+                fontSize: 32,
+                mb: 2,
+                mx: "auto",
+                cursor: "pointer",
+                transition: "0.3s",
+                "&:hover": { transform: "scale(1.05)" },
+              }}
+              onClick={() => fileInputRef.current.click()}
+            >
+              {!profileImage && "A"}
+            </Avatar>
 
-    {/* Password */}
-    <Box sx={{ mb: 3 }}>
-      <Typography variant="subtitle2" color="textSecondary">
-        New Password
-      </Typography>
+            {avatarHover && (
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 0,
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: 80,
+                  height: 80,
+                  borderRadius: "50%",
+                  backgroundColor: "rgba(0,0,0,0.6)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  cursor: "pointer",
+                }}
+                onClick={() => fileInputRef.current.click()}
+              >
+                <CameraAltIcon sx={{ fontSize: 30, color: "#fff" }} />
+              </Box>
+            )}
 
-      {/* hidden autofill breaker */}
-      <input
-        type="password"
-        name="password"
-        autoComplete="current-password"
-        style={{ display: "none" }}
-      />
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              style={{ display: "none" }}
+            />
+          </Box>
 
-      <input
-        placeholder="Enter new password"
-        value={newAdminPassword}
-        autoComplete="new-password"
-        name="new-password"
-        onChange={(e) => setNewAdminPassword(e.target.value)}
-        style={{
-          width: "100%",
-          padding: "10px",
-          borderRadius: "4px",
-          border: "1px solid #ccc",
-        }}
-      />
-    </Box>
+          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
+            Edit Admin Profile
+          </Typography>
+        </Box>
 
-    {/* Buttons */}
-    <Button
-      variant="contained"
-      fullWidth
-      sx={{ mb: 1 }}
-      onClick={() => {
-        localStorage.setItem(
-          "adminCredentials",
-          JSON.stringify({
-            email: newAdminEmail,
-            password: newAdminPassword,
-          })
-        );
+        <Box sx={{ p: 3 }}>
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" color="textSecondary">
+              Email
+            </Typography>
+            <input
+              type="email"
+              value={newAdminEmail}
+              onChange={(e) => setNewAdminEmail(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </Box>
 
-        setIsEditProfileOpen(false);
-        window.location.reload();
-      }}
-    >
-      Save Changes
-    </Button>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" color="textSecondary">
+              New Password
+            </Typography>
 
-    <Button
-      variant="outlined"
-      color="error"
-      fullWidth
-      onClick={() => setIsEditProfileOpen(false)}
-    >
-      Cancel
-    </Button>
-  </Box>
-</Dialog>
+            <input
+              type="password"
+              name="password"
+              autoComplete="current-password"
+              style={{ display: "none" }}
+            />
 
+            <input
+              placeholder="Enter new password"
+              value={newAdminPassword}
+              autoComplete="new-password"
+              name="new-password"
+              onChange={(e) => setNewAdminPassword(e.target.value)}
+              style={{
+                width: "100%",
+                padding: "10px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </Box>
+
+          <Button
+            variant="contained"
+            fullWidth
+            sx={{ mb: 1 }}
+            onClick={() => {
+              localStorage.setItem(
+                "adminCredentials",
+                JSON.stringify({
+                  email: newAdminEmail,
+                  password: newAdminPassword,
+                })
+              );
+
+              setIsEditProfileOpen(false);
+              window.location.reload();
+            }}
+          >
+            Save Changes
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="error"
+            fullWidth
+            onClick={() => setIsEditProfileOpen(false)}
+          >
+            Cancel
+          </Button>
+        </Box>
+      </Dialog>
 
       <AppBar position="fixed" color="default" sx={{ boxShadow: 1 }}>
         <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
@@ -850,40 +999,22 @@ const Navbar = () => {
                 aria-haspopup="true"
               >
                 <Avatar
+                  src={profileImage}
                   sx={{
-                    height: "20px",
-                    width: "20px",
-                    border: "none",
-                    padding: email ? "20px" : "0",
+                    height: 36,
+                    width: 36,
                     backgroundColor:
                       sessionStorage.getItem("isAdmin") === "true"
-                        ? "#2f4bd7ff"
+                        ? "#2f4bd7"
                         : email
                         ? "#1976D2"
                         : "transparent",
-                    color:
-                      sessionStorage.getItem("isAdmin") === "true"
-                        ? "#000"
-                        : "#000",
-                    fontWeight:
-                      sessionStorage.getItem("isAdmin") === "true"
-                        ? "bold"
-                        : "normal",
-                    fontFamily:
-                      sessionStorage.getItem("isAdmin") === "true"
-                        ? "revert"
-                        : "inherit",
+                    color: "#000",
                   }}
                 >
-                  {email ? (
-                    sessionStorage.getItem("isAdmin") === "true" ? (
-                      "A"
-                    ) : (
-                      email.charAt(0).toUpperCase()
-                    )
-                  ) : (
-                    <AccountCircle />
-                  )}
+                  {!profileImage && email
+                    ? email.charAt(0).toUpperCase()
+                    : !profileImage && <AccountCircle />}
                 </Avatar>
               </IconButton>
 
