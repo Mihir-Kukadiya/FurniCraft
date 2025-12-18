@@ -1,8 +1,10 @@
 add serach bar to search products. - completed
 
-user and admin upload profile picture in my profile.
+display orderdate and receivedate in Orders schema in mongoDB. - completed
 
-display orderdate and receivedate in Orders schema in mongoDB.
+make admin globally.
+
+user and admin upload profile picture in my profile.
 
 admin can change their email and password. - completed
 
@@ -12,6 +14,6 @@ dark mode facility.
 
 when hover product image then that image change to another side view.
 
-apply add, edit and remove facility in expensive products also.
+apply add, edit and remove facility in expensive products also.y
 
 apply real payment system.

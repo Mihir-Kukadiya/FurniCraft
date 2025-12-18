@@ -11,8 +11,10 @@ import {
   Dialog,
   Avatar,
   Badge,
+  TextField,
 } from "@mui/material";
 import { useCart } from "./CartProvider";
+import axios from "axios";
 import { Snackbar, Alert } from "@mui/material";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { useFavorites } from "./FavoritesProvider";
@@ -28,15 +30,6 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
-
-const DEFAULT_ADMIN = {
-  email: "mkukadiya001@gmail.com",
-  password: "Mihir@3190",
-};
-
-if (!localStorage.getItem("adminCredentials")) {
-  localStorage.setItem("adminCredentials", JSON.stringify(DEFAULT_ADMIN));
-}
 
 const Navbar = () => {
   // ========================= responsive ============================
@@ -72,9 +65,14 @@ const Navbar = () => {
 
   const [emailFocus, setEmailFocus] = useState(false);
   const [passFocus, setPassFocus] = useState(false);
-
   const email = sessionStorage.getItem("email");
-  const password = sessionStorage.getItem("password");
+  const [storedPassword, setStoredPassword] = useState(
+    sessionStorage.getItem("password")
+  );
+
+  React.useEffect(() => {
+    setStoredPassword(sessionStorage.getItem("password"));
+  }, [email]);
 
   const [loginError, setLoginError] = useState("");
 
@@ -135,12 +133,8 @@ const Navbar = () => {
 
   // ============================ admin change their profile ==================================
 
-  const adminCredentials = JSON.parse(localStorage.getItem("adminCredentials"));
-
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [newAdminEmail, setNewAdminEmail] = useState(
-    adminCredentials?.email || ""
-  );
+  const [newAdminEmail, setNewAdminEmail] = useState(email || "");
   const [newAdminPassword, setNewAdminPassword] = useState("");
 
   // ===================== Change Profile Image ========================
@@ -212,6 +206,21 @@ const Navbar = () => {
       reader.readAsDataURL(file);
     });
   };
+
+  // ===================== Change Password (user) ========================
+
+  const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false);
+  const [securityQuestion, setSecurityQuestion] = useState("");
+  const [securityAnswer, setSecurityAnswer] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+
+  React.useEffect(() => {
+    if (email && sessionStorage.getItem("isAdmin") !== "true") {
+      const savedQuestion =
+        localStorage.getItem(`securityQuestion_${email}`) || "";
+      setSecurityQuestion(savedQuestion);
+    }
+  }, [email]);
 
   // ==============================================================
 
@@ -323,36 +332,74 @@ const Navbar = () => {
             </Typography>
           </Box>
 
-          <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" color="textSecondary">
-              Password
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                p: 1,
-                border: "1px solid #ddd",
-                borderRadius: 1,
-                backgroundColor: "#fff",
-                fontFamily: "monospace",
-              }}
-            >
-              {password ? "*".repeat(password.length) : ""}
-            </Typography>
-          </Box>
+          {/* Password shown ONLY for normal users */}
+          {sessionStorage.getItem("isAdmin") !== "true" && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" color="textSecondary">
+                Password
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  p: 1,
+                  border: "1px solid #ddd",
+                  borderRadius: 1,
+                  backgroundColor: "#fff",
+                  fontFamily: "monospace",
+                }}
+              >
+                {storedPassword ? "*".repeat(storedPassword.length) : ""}
+              </Typography>
+            </Box>
+          )}
+
+          {sessionStorage.getItem("isAdmin") === "true" && (
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="subtitle2" color="textSecondary">
+                Password
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  p: 1,
+                  border: "1px solid #ddd",
+                  borderRadius: 1,
+                  backgroundColor: "#fff",
+                  fontFamily: "monospace",
+                }}
+              >
+                {storedPassword || "No password stored"}
+              </Typography>
+            </Box>
+          )}
+
           {sessionStorage.getItem("isAdmin") === "true" && (
             <Button
               variant="contained"
               fullWidth
               sx={{ mb: 2 }}
               onClick={() => {
-                setNewAdminEmail(adminCredentials?.email || "");
-                setNewAdminPassword(adminCredentials?.password || "");
+                setNewAdminEmail(email || "");
+                setNewAdminPassword("");
+
                 setIsDialogOpen(false);
                 setIsEditProfileOpen(true);
               }}
             >
               Edit Profile
+            </Button>
+          )}
+          {sessionStorage.getItem("isAdmin") !== "true" && (
+            <Button
+              variant="contained"
+              fullWidth
+              sx={{ mb: 2 }}
+              onClick={() => {
+                setIsDialogOpen(false);
+                setIsChangePasswordOpen(true);
+              }}
+            >
+              Change Password
             </Button>
           )}
 
@@ -512,20 +559,30 @@ const Navbar = () => {
           <Box sx={{ textAlign: "center" }}>
             <Box
               component="a"
-              onClick={() => {
-                if (
-                  adminEmail === adminCredentials.email &&
-                  adminPassword === adminCredentials.password
-                ) {
-                  sessionStorage.setItem("email", adminEmail);
-                  sessionStorage.setItem("password", adminPassword);
+              onClick={async () => {
+                try {
+                  const res = await axios.post(
+                    "http://localhost:3000/api/admin/login",
+                    {
+                      email: adminEmail,
+                      password: adminPassword,
+                    }
+                  );
+
+                  sessionStorage.setItem("email", res.data.admin.email);
                   sessionStorage.setItem("isAdmin", "true");
+
+                  // never store admin password
+                  sessionStorage.setItem("password", adminPassword);
+                  setStoredPassword(adminPassword);
+
                   setIsAdminDialogOpen(false);
                   setLoginError("");
-                  setProfileImage(getProfileImage());
                   navigate("/");
-                } else {
-                  setLoginError("Invalid email or password");
+                } catch (err) {
+                  setLoginError(
+                    err.response?.data?.message || "Invalid admin credentials"
+                  );
                 }
               }}
               sx={{
@@ -613,6 +670,106 @@ const Navbar = () => {
               Submit
             </Box>
           </Box>
+        </Box>
+      </Dialog>
+
+      <Dialog
+        open={isChangePasswordOpen}
+        onClose={() => setIsChangePasswordOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <Box
+          sx={{
+            background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
+            color: "#fff",
+            p: 3,
+            textAlign: "center",
+          }}
+        >
+          <Typography variant="h5">Change Password</Typography>
+        </Box>
+
+        <Box sx={{ p: 3, display: "flex", flexDirection: "column", gap: 2 }}>
+          {/* Email */}
+          <TextField label="Email" value={email} disabled fullWidth />
+
+          {/* Security Question */}
+          <TextField
+            label="Security Question"
+            value={securityQuestion}
+            disabled
+            fullWidth
+            sx={{ backgroundColor: "#f0f0f0" }}
+          />
+
+          {/* Security Answer */}
+          <TextField
+            label="Security Answer"
+            placeholder="Enter your answer"
+            value={securityAnswer}
+            onChange={(e) => setSecurityAnswer(e.target.value)}
+            fullWidth
+          />
+
+          {/* New Password */}
+          <TextField
+            label="New Password"
+            type="password"
+            value={newUserPassword}
+            onChange={(e) => setNewUserPassword(e.target.value)}
+            fullWidth
+          />
+
+          <Button
+            variant="contained"
+            onClick={async () => {
+              if (!securityAnswer || !newUserPassword) {
+                setSnackbarMessage("Please fill all fields");
+                setSnackbarSeverity("warning");
+                setOpenSnackbar(true);
+                return;
+              }
+
+              try {
+                const res = await axios.post(
+                  "http://localhost:3000/api/auth/change-password",
+                  {
+                    email,
+                    securityQuestion,
+                    securityAnswer,
+                    newPassword: newUserPassword,
+                  }
+                );
+
+                setSnackbarMessage(
+                  res.data.message || "Password changed successfully"
+                );
+                setSnackbarSeverity("success");
+                setOpenSnackbar(true);
+
+                setIsChangePasswordOpen(false);
+                setSecurityAnswer("");
+                setNewUserPassword("");
+              } catch (err) {
+                setSnackbarMessage(
+                  err.response?.data?.message || "Invalid security answer"
+                );
+                setSnackbarSeverity("error");
+                setOpenSnackbar(true);
+              }
+            }}
+          >
+            Save Password
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="error"
+            onClick={() => setIsChangePasswordOpen(false)}
+          >
+            Cancel
+          </Button>
         </Box>
       </Dialog>
 
@@ -747,17 +904,31 @@ const Navbar = () => {
             variant="contained"
             fullWidth
             sx={{ mb: 1 }}
-            onClick={() => {
-              localStorage.setItem(
-                "adminCredentials",
-                JSON.stringify({
+            onClick={async () => {
+              try {
+                await axios.put("http://localhost:3000/api/admin/update", {
                   email: newAdminEmail,
                   password: newAdminPassword,
-                })
-              );
+                  profileImage,
+                });
 
-              setIsEditProfileOpen(false);
-              window.location.reload();
+                setSnackbarMessage("Admin profile updated successfully");
+                setSnackbarSeverity("success");
+                setOpenSnackbar(true);
+
+                sessionStorage.setItem("email", newAdminEmail);
+                sessionStorage.setItem("password", newAdminPassword);
+                setStoredPassword(newAdminPassword);
+
+                setIsEditProfileOpen(false);
+              } catch (err) {
+                setSnackbarMessage(
+                  err.response?.data?.message ||
+                    "Failed to update admin profile"
+                );
+                setSnackbarSeverity("error");
+                setOpenSnackbar(true);
+              }
             }}
           >
             Save Changes

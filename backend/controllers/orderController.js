@@ -4,7 +4,19 @@ import Order from "../models/Order.js";
 
 const getOrders = async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
+    const orders = await Order.find()
+      .select('+orderDate +receiveDate') // ✅ Explicitly select date fields
+      .sort({ createdAt: -1 });
+    
+    console.log("📋 Fetched orders count:", orders.length);
+    if (orders.length > 0) {
+      console.log("Sample order dates:", {
+        orderDate: orders[0].orderDate,
+        receiveDate: orders[0].receiveDate,
+        createdAt: orders[0].createdAt
+      });
+    }
+    
     res.json(orders);
   } catch (err) {
     console.error("❌ Fetch orders error:", err);
@@ -18,9 +30,27 @@ const createOrder = async (req, res) => {
   try {
     console.log("📩 Incoming order data:", JSON.stringify(req.body, null, 2));
 
-    const order = new Order(req.body);
-    const saved = await order.save();
+    const order = new Order({
+      customerName: req.body.customerName,
+      customerEmail: req.body.customerEmail,
+      items: req.body.items,
+      total: req.body.total,
+      address: req.body.address,
+      paymentMethod: req.body.paymentMethod,
+      status: req.body.status || "Pending",
+      orderDate: new Date(), // ✅ Explicitly set orderDate
+      receiveDate: null, // ✅ Explicitly set receiveDate as null initially
+    });
 
+    const saved = await order.save();
+    
+    console.log("✅ Order saved:", {
+      id: saved._id,
+      orderDate: saved.orderDate,
+      receiveDate: saved.receiveDate,
+      status: saved.status
+    });
+    
     res.status(201).json(saved);
   } catch (err) {
     console.error("❌ Order save error:", err);
@@ -28,8 +58,6 @@ const createOrder = async (req, res) => {
       error: "Failed to save order",
       name: err.name,
       message: err.message,
-      stack: err.stack,
-      errors: err.errors || null,
     });
   }
 };
@@ -41,19 +69,40 @@ const updateOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      id,
-      { status },
-      { new: true, runValidators: true }
-    );
+    console.log("📝 Updating order:", id, "to status:", status);
 
-    if (!updatedOrder) {
+    // Find the order first to check current state
+    const existingOrder = await Order.findById(id);
+    
+    if (!existingOrder) {
       return res.status(404).json({ message: "Order not found" });
     }
 
+    // Prepare update data
+    const updateData = { status };
+
+    // Set receiveDate when order status changes to "Completed"
+    if (status === "Completed" && !existingOrder.receiveDate) {
+      updateData.receiveDate = new Date();
+      console.log("✅ Setting receiveDate:", updateData.receiveDate);
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    console.log("📦 Updated order:", {
+      id: updatedOrder._id,
+      status: updatedOrder.status,
+      orderDate: updatedOrder.orderDate,
+      receiveDate: updatedOrder.receiveDate
+    });
+
     res.json(updatedOrder);
   } catch (error) {
-    console.error(error);
+    console.error("❌ Update order status error:", error);
 
     if (error.name === "ValidationError") {
       return res.status(400).json({ message: "Invalid status value" });
@@ -84,7 +133,7 @@ const deleteOrder = async (req, res) => {
 };
 
 // ============================= Clear all Orders ==========================
- 
+
 const clearAllOrders = async (req, res) => {
   try {
     await Order.deleteMany({});
@@ -95,4 +144,10 @@ const clearAllOrders = async (req, res) => {
   }
 };
 
-export { getOrders, createOrder, updateOrderStatus, deleteOrder, clearAllOrders };
+export {
+  getOrders,
+  createOrder,
+  updateOrderStatus,
+  deleteOrder,
+  clearAllOrders,
+};

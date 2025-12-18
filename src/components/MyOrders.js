@@ -12,6 +12,7 @@ import {
   TableRow,
   Button,
   Stack,
+  Chip,
 } from "@mui/material";
 import axios from "axios";
 import Swal from "sweetalert2";
@@ -26,10 +27,20 @@ const MyOrders = () => {
     const fetchMyOrders = async () => {
       try {
         const res = await axios.get("http://localhost:3000/api/orders");
+        console.log("📦 Fetched orders:", res.data); // ✅ Debug log
         const myOrders = res.data.filter(
           (order) => order.customerEmail?.toLowerCase() === email?.toLowerCase()
         );
         setOrders(myOrders);
+        
+        // ✅ Log to check if dates are present
+        if (myOrders.length > 0) {
+          console.log("Sample order:", {
+            orderDate: myOrders[0].orderDate,
+            receiveDate: myOrders[0].receiveDate,
+            createdAt: myOrders[0].createdAt
+          });
+        }
       } catch (err) {
         console.error("Failed to fetch user's orders:", err);
       }
@@ -67,6 +78,7 @@ const MyOrders = () => {
   // =================== Format date/time nicely ===================
 
   const formatDate = (timestamp) => {
+    if (!timestamp) return "N/A";
     const date = new Date(timestamp);
     let day = String(date.getDate()).padStart(2, "0");
     let month = String(date.getMonth() + 1).padStart(2, "0");
@@ -75,6 +87,7 @@ const MyOrders = () => {
   };
 
   const formatTime = (timestamp) => {
+    if (!timestamp) return "N/A";
     const date = new Date(timestamp);
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   };
@@ -111,7 +124,7 @@ const MyOrders = () => {
             p: { xs: 2, sm: 3 },
           }}
         >
-          You haven’t placed any orders yet.
+          You haven't placed any orders yet.
         </Typography>
       ) : (
         <Box
@@ -143,10 +156,13 @@ const MyOrders = () => {
                     <b>Order ID</b>
                   </TableCell>
                   <TableCell>
-                    <b>Date</b>
+                    <b>Order Date</b>
                   </TableCell>
                   <TableCell>
-                    <b>Time</b>
+                    <b>Order Time</b>
+                  </TableCell>
+                  <TableCell>
+                    <b>Receive Date</b>
                   </TableCell>
                   <TableCell>
                     <b>Items</b>
@@ -178,8 +194,28 @@ const MyOrders = () => {
                     }}
                   >
                     <TableCell>{order._id}</TableCell>
-                    <TableCell>{formatDate(order.createdAt)}</TableCell>
-                    <TableCell>{formatTime(order.createdAt)}</TableCell>
+                    
+                    {/* ✅ Changed from createdAt to orderDate */}
+                    <TableCell>{formatDate(order.orderDate)}</TableCell>
+                    <TableCell>{formatTime(order.orderDate)}</TableCell>
+                    
+                    {/* ✅ Added receiveDate column */}
+                    <TableCell>
+                      {order.receiveDate ? (
+                        <Chip 
+                          label={formatDate(order.receiveDate)} 
+                          color="success" 
+                          size="small"
+                        />
+                      ) : (
+                        <Chip 
+                          label="Not Received" 
+                          color="warning" 
+                          size="small"
+                        />
+                      )}
+                    </TableCell>
+                    
                     <TableCell>
                       {order.items.map((item, idx) => (
                         <div key={idx}>
@@ -188,7 +224,13 @@ const MyOrders = () => {
                       ))}
                     </TableCell>
                     <TableCell>₹{order.total}</TableCell>
-                    <TableCell>{order.status}</TableCell>
+                    <TableCell>
+                      <Chip 
+                        label={order.status} 
+                        color={order.status === "Completed" ? "success" : "default"}
+                        size="small"
+                      />
+                    </TableCell>
                     <TableCell>{order.paymentMethod?.toUpperCase()}</TableCell>
 
                     <TableCell>
