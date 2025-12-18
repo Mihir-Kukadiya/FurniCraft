@@ -139,28 +139,6 @@ const Navbar = () => {
 
   // ===================== Change Profile Image ========================
 
-  React.useEffect(() => {
-  const fetchAdminProfile = async () => {
-    if (sessionStorage.getItem("isAdmin") === "true") {
-      try {
-        const res = await axios.get(
-          "http://localhost:3000/api/admin/profile",
-          {
-            params: { email: sessionStorage.getItem("email") },
-          }
-        );
-
-        setProfileImage(res.data.profileImage || null);
-      } catch (err) {
-        console.error("Failed to load admin profile");
-      }
-    }
-  };
-
-  fetchAdminProfile();
-}, []);
-
-
   const fileInputRef = useRef(null);
   const [avatarHover, setAvatarHover] = useState(false);
 

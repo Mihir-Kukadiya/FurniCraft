@@ -2,7 +2,7 @@ add serach bar to search products. - completed
 
 display orderdate and receivedate in Orders schema in mongoDB. - completed
 
-make admin globally.
+make admin globally. - completed
 
 user and admin upload profile picture in my profile.
 
