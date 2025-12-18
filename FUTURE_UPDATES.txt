@@ -14,6 +14,6 @@ dark mode facility.
 
 when hover product image then that image change to another side view.
 
-apply add, edit and remove facility in expensive products also.y
+apply add, edit and remove facility in expensive products also.
 
 apply real payment system.
