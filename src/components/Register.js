@@ -13,10 +13,12 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import Joi from "joi";
+import { useTheme } from "@mui/material/styles";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 
 const Register = () => {
+  const theme = useTheme();
   // ======================= validation =============================
 
   const registerSchema = Joi.object({
@@ -170,8 +172,9 @@ const Register = () => {
         <Box
           sx={{
             width: 500,
-            backgroundColor: "#fff",
-            border: "2px solid #000",
+            backgroundColor: "background.paper",
+            border: `1px solid ${theme.palette.divider}`,
+            color: "text.primary",
             borderRadius: "10px",
             padding: 4,
             display: "flex",
@@ -209,7 +212,11 @@ const Register = () => {
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               InputProps={{
-                sx: { borderRadius: "10px", height: "50px" },
+                sx: {
+                  borderRadius: "10px",
+                  height: "50px",
+                  backgroundColor: "background.paper",
+                },
               }}
             />
           </Box>
@@ -222,7 +229,11 @@ const Register = () => {
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               InputProps={{
-                sx: { borderRadius: "10px", height: "50px" },
+                sx: {
+                  borderRadius: "10px",
+                  height: "50px",
+                  backgroundColor: "background.paper",
+                },
               }}
             />
           </Box>
@@ -235,7 +246,11 @@ const Register = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               InputProps={{
-                sx: { borderRadius: "10px", height: "50px" },
+                sx: {
+                  borderRadius: "10px",
+                  height: "50px",
+                  backgroundColor: "background.paper",
+                },
               }}
             />
           </Box>
@@ -249,7 +264,11 @@ const Register = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               InputProps={{
-                sx: { borderRadius: "10px", height: "50px" },
+                sx: {
+                  borderRadius: "10px",
+                  height: "50px",
+                  backgroundColor: "background.paper",
+                },
               }}
             />
             <Box
@@ -260,7 +279,7 @@ const Register = () => {
                 right: "10px",
                 top: "42px",
                 cursor: "pointer",
-                color: "#333",
+                color: "text.secondary",
               }}
             >
               {showPassword ? <FaEye /> : <FaEyeSlash />}
@@ -278,7 +297,11 @@ const Register = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               InputProps={{
-                sx: { borderRadius: "10px", height: "50px" },
+                sx: {
+                  borderRadius: "10px",
+                  height: "50px",
+                  backgroundColor: "background.paper",
+                },
               }}
             />
             <Box
@@ -289,7 +312,7 @@ const Register = () => {
                 right: "10px",
                 top: "42px",
                 cursor: "pointer",
-                color: "#333",
+                color: "text.secondary",
               }}
             >
               {showConfirmPassword ? <FaEye /> : <FaEyeSlash />}
@@ -309,7 +332,11 @@ const Register = () => {
                 value={securityQuestion}
                 onChange={(e) => setSecurityQuestion(e.target.value)}
                 label="Select Security Question"
-                sx={{ borderRadius: "10px", height: "50px" }}
+                sx={{
+                  borderRadius: "10px",
+                  height: "50px",
+                  backgroundColor: "background.paper",
+                }}
               >
                 <MenuItem value="favoriteColor">
                   What is your favorite color?
@@ -331,7 +358,11 @@ const Register = () => {
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
               InputProps={{
-                sx: { borderRadius: "10px", height: "50px" },
+                sx: {
+                  borderRadius: "10px",
+                  height: "50px",
+                  backgroundColor: "background.paper",
+                },
               }}
             />
           </Box>
@@ -339,8 +370,11 @@ const Register = () => {
           <Button
             onClick={handleSubmit}
             sx={{
-              backgroundColor: "#151717",
-              color: "#fff",
+              backgroundColor: "primary.main",
+              color: "primary.contrastText",
+              "&:hover": {
+                backgroundColor: "primary.dark",
+              },
               height: "50px",
               borderRadius: "10px",
               textTransform: "none",
@@ -357,8 +391,8 @@ const Register = () => {
           <Button
             onClick={() => navigate("/login")}
             sx={{
-              border: "1px solid #2d79f3",
-              color: "#2d79f3",
+              border: `1px solid ${theme.palette.primary.main}`,
+              color: "primary.main",
               height: "50px",
               borderRadius: "10px",
               textTransform: "none",

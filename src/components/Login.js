@@ -10,11 +10,13 @@ import {
   Alert,
   Snackbar,
 } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import Joi from "joi";
 
 const Login = () => {
+  const theme = useTheme();
   // ======================= validation =============================
 
   const loginSchema = Joi.object({
@@ -152,8 +154,9 @@ const Login = () => {
       <Box
         sx={{
           width: 500,
-          backgroundColor: "#fff",
-          border: "2px solid #000",
+          backgroundColor: theme.palette.background.paper,
+          border: `1px solid ${theme.palette.divider}`,
+          color: theme.palette.text.primary,
           borderRadius: "10px",
           padding: 4,
           display: "flex",
@@ -222,7 +225,7 @@ const Login = () => {
               right: "10px",
               top: "42px",
               cursor: "pointer",
-              color: "#333",
+              color: theme.palette.text.secondary,
             }}
           >
             {showPassword ? <FaEye /> : <FaEyeSlash />}
@@ -251,8 +254,11 @@ const Login = () => {
         <Button
           onClick={handleSubmit}
           sx={{
-            backgroundColor: "#151717",
-            color: "#fff",
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
+            "&:hover": {
+              backgroundColor: theme.palette.primary.dark,
+            },
             height: "50px",
             borderRadius: "10px",
             textTransform: "none",
@@ -270,8 +276,8 @@ const Login = () => {
         <Button
           onClick={() => navigate("/register")}
           sx={{
-            border: "1px solid #2d79f3",
-            color: "#2d79f3",
+            border: `1px solid ${theme.palette.primary.main}`,
+            color: theme.palette.primary.main,
             height: "50px",
             borderRadius: "10px",
             textTransform: "none",
@@ -294,7 +300,7 @@ const Login = () => {
             borderRadius: 3,
             overflow: "hidden",
             boxShadow: 5,
-            backgroundColor: "#f9f9f9",
+            backgroundColor: theme.palette.background.paper,
           },
         }}
       >
@@ -328,7 +334,9 @@ const Login = () => {
               value={securityQuestion}
               disabled
               fullWidth
-              sx={{ backgroundColor: "#f0f0f0" }}
+              sx={{
+                backgroundColor: theme.palette.action.disabledBackground,
+              }}
             />
 
             <TextField

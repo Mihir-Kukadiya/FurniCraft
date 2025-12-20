@@ -14,12 +14,14 @@ import {
   Button,
 } from "@mui/material";
 import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
+import { useTheme } from "@mui/material/styles";
 import { MdEmail } from "react-icons/md";
 import { FaPhoneAlt } from "react-icons/fa";
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 
 const AboutUs = () => {
+  const theme = useTheme();
   // ========================== our goals ===============================
 
   const goals = [
@@ -95,7 +97,7 @@ const AboutUs = () => {
     <Box
       id="about"
       sx={{
-        bgcolor: "#fff",
+        bgcolor: theme.palette.background.default,
         height: "auto",
         pt: "30px",
       }}
@@ -124,10 +126,14 @@ const AboutUs = () => {
       </Box>
 
       <Container maxWidth={false} disableGutters sx={{ py: 6 }}>
-        <Typography align="center" fontWeight="bold" gutterBottom
-        sx={{
-          fontSize: { xs: "2rem", md: "2.5rem" },
-        }}>
+        <Typography
+          align="center"
+          fontWeight="bold"
+          gutterBottom
+          sx={{
+            fontSize: { xs: "2rem", md: "2.5rem" },
+          }}
+        >
           About Us
         </Typography>
         <Typography
@@ -141,7 +147,7 @@ const AboutUs = () => {
           craftsmanship with modern aesthetics to turn houses into homes.
         </Typography>
 
-        <Divider sx={{ my: 4 }} />
+        <Divider sx={{ my: 4, borderColor: theme.palette.divider }} />
 
         <Box sx={{ width: "100%", mb: 6, px: { xs: 2, sm: 3 } }}>
           {(() => {
@@ -187,6 +193,8 @@ const AboutUs = () => {
                         textAlign: "center",
                         borderRadius: 3,
                         boxShadow: 3,
+                        backgroundColor: theme.palette.background.paper,
+                        color: theme.palette.text.primary,
                         height: "100%",
                       }}
                     >
@@ -240,8 +248,10 @@ const AboutUs = () => {
                   p: { xs: 2, sm: 3 },
                   borderRadius: 3,
                   width: "200px",
-                  height: '220px',
-                  boxShadow: 2,
+                  height: "220px",
+                  boxShadow: 3,
+                  backgroundColor: theme.palette.background.paper,
+                  color: theme.palette.text.primary,
                   cursor: "pointer",
                   transition: "0.3s",
                   "&:hover": { boxShadow: 6 },
@@ -279,6 +289,12 @@ const AboutUs = () => {
 
       <Dialog
         open={Boolean(selectedMember)}
+        PaperProps={{
+          sx: {
+            backgroundColor: theme.palette.background.paper,
+            color: theme.palette.text.primary,
+          },
+        }}
         onClose={handleClose}
         maxWidth="sm"
         fullWidth

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import saleImg from "../images/Products/sale.jpg";
 import axios from "axios";
+import { useTheme } from "@mui/material/styles";
 import { MdEdit } from "react-icons/md";
 import { Tooltip } from "@mui/material";
 import {
@@ -40,6 +41,8 @@ const chunkArray = (arr, size) =>
 // =============================================================
 
 const Products = () => {
+  const theme = useTheme();
+
   // ======================= product popup ========================
 
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -169,23 +172,20 @@ const Products = () => {
   };
 
   const sortProducts = productsData.filter((product) => {
-  const numericPrice = parseInt(String(product.price).replace(/[^\d]/g, ""));
+    const numericPrice = parseInt(String(product.price).replace(/[^\d]/g, ""));
 
-  const inCategory =
-    category === "All" ||
-    product.category?.toLowerCase() === category.toLowerCase();
+    const inCategory =
+      category === "All" ||
+      product.category?.toLowerCase() === category.toLowerCase();
 
-  const inPriceRange =
-    numericPrice >= price[0] && numericPrice <= price[1];
+    const inPriceRange = numericPrice >= price[0] && numericPrice <= price[1];
 
-  const inSearch =
-    product.name
+    const inSearch = product.name
       ?.toLowerCase()
       .includes(searchQuery.trim().toLowerCase());
 
-  return inCategory && inPriceRange && inSearch;
-});
-
+    return inCategory && inPriceRange && inSearch;
+  });
 
   const sortedProducts = [...sortProducts];
 
@@ -217,7 +217,7 @@ const Products = () => {
         PaperProps={{
           sx: {
             borderRadius: 4,
-            background: "#f9f9f9",
+            bgcolor: "background.paper",
             width: "600px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
           },
@@ -228,7 +228,7 @@ const Products = () => {
             fontSize: "1.6rem",
             fontWeight: "bold",
             textAlign: "center",
-            color: "#333",
+            color: "text.primary"
           }}
         >
           Add New Product
@@ -266,7 +266,7 @@ const Products = () => {
                 }
                 fullWidth
                 sx={{
-                  backgroundColor: "#fff",
+                  backgroundColor: theme.palette.background.paper,
                   borderRadius: 2,
                   boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
                 }}
@@ -279,7 +279,7 @@ const Products = () => {
                 }
                 fullWidth
                 sx={{
-                  backgroundColor: "#fff",
+                  backgroundColor: theme.palette.background.paper,
                   borderRadius: 2,
                   boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
                 }}
@@ -292,7 +292,7 @@ const Products = () => {
                 }
                 fullWidth
                 sx={{
-                  backgroundColor: "#fff",
+                  backgroundColor: theme.palette.background.paper,
                   borderRadius: 2,
                   boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
                 }}
@@ -300,7 +300,7 @@ const Products = () => {
               <FormControl
                 fullWidth
                 sx={{
-                  backgroundColor: "#fff",
+                  backgroundColor: theme.palette.background.paper,
                   borderRadius: 2,
                   boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
                 }}
@@ -330,7 +330,7 @@ const Products = () => {
                 multiline
                 rows={3}
                 sx={{
-                  backgroundColor: "#fff",
+                  backgroundColor: theme.palette.background.paper,
                   borderRadius: 2,
                   boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
                 }}
@@ -392,7 +392,7 @@ const Products = () => {
         PaperProps={{
           sx: {
             borderRadius: 4,
-            background: "#f9f9f9",
+            bgcolor: "background.paper",
             width: "600px",
             boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
           },
@@ -403,7 +403,7 @@ const Products = () => {
             fontSize: "1.6rem",
             fontWeight: "bold",
             textAlign: "center",
-            color: "#333",
+            color: "text.primary",
           }}
         >
           Edit Product
@@ -441,9 +441,16 @@ const Products = () => {
                   onChange={(e) => handleEditFieldChange("img", e.target.value)}
                   fullWidth
                   sx={{
-                    backgroundColor: "#fff",
+                    backgroundColor: theme.palette.background.paper,
                     borderRadius: 2,
                     boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                    input: { color: theme.palette.text.primary },
+                    "& .MuiInputLabel-root": {
+                      color: theme.palette.text.secondary,
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: theme.palette.divider,
+                    },
                   }}
                 />
 
@@ -455,9 +462,16 @@ const Products = () => {
                   }
                   fullWidth
                   sx={{
-                    backgroundColor: "#fff",
+                    backgroundColor: theme.palette.background.paper,
                     borderRadius: 2,
                     boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                    input: { color: theme.palette.text.primary },
+                    "& .MuiInputLabel-root": {
+                      color: theme.palette.text.secondary,
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: theme.palette.divider,
+                    },
                   }}
                 />
 
@@ -469,21 +483,33 @@ const Products = () => {
                   }
                   fullWidth
                   sx={{
-                    backgroundColor: "#fff",
+                    backgroundColor: theme.palette.background.paper,
                     borderRadius: 2,
                     boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                    input: { color: theme.palette.text.primary },
+                    "& .MuiInputLabel-root": {
+                      color: theme.palette.text.secondary,
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: theme.palette.divider,
+                    },
                   }}
                 />
 
                 <FormControl
                   fullWidth
                   sx={{
-                    backgroundColor: "#fff",
+                    backgroundColor: theme.palette.background.paper,
                     borderRadius: 2,
                     boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
                   }}
                 >
-                  <InputLabel id="edit-category-label">Category</InputLabel>
+                  <InputLabel
+                    id="edit-category-label"
+                    sx={{ color: theme.palette.text.secondary }}
+                  >
+                    Category
+                  </InputLabel>
                   <Select
                     labelId="edit-category-label"
                     value={editProduct.category}
@@ -508,9 +534,16 @@ const Products = () => {
                   multiline
                   rows={3}
                   sx={{
-                    backgroundColor: "#fff",
+                    backgroundColor: theme.palette.background.paper,
                     borderRadius: 2,
                     boxShadow: "0 1px 4px rgba(0,0,0,0.1)",
+                    input: { color: theme.palette.text.primary },
+                    "& .MuiInputLabel-root": {
+                      color: theme.palette.text.secondary,
+                    },
+                    "& .MuiOutlinedInput-notchedOutline": {
+                      borderColor: theme.palette.divider,
+                    },
                   }}
                 />
 
@@ -544,14 +577,13 @@ const Products = () => {
                     mt: 1,
                     py: 1.2,
                     fontSize: "15px",
-                    backgroundColor: "#1976d2",
+                    backgroundColor: theme.palette.primary.main,
+                    "&:hover": {
+                      backgroundColor: theme.palette.primary.dark,
+                    },
                     borderRadius: "30px",
                     textTransform: "none",
                     boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    "&:hover": {
-                      backgroundColor: "#115293",
-                      boxShadow: "0 6px 18px rgba(0,0,0,0.2)",
-                    },
                   }}
                 >
                   Save Changes
@@ -601,7 +633,7 @@ const Products = () => {
             onClick={() => setIsAddDialogOpen(true)}
             sx={{
               position: "absolute",
-              top: "70px",
+              top: { xs: "20px", md: "70px" },
               right: "20px",
               transition: ".3s",
               fontWeight: "bold",
@@ -632,6 +664,8 @@ const Products = () => {
                 height: "100%",
                 boxSizing: "border-box",
                 margin: "15px",
+                bgcolor: "background.paper",
+                color: "text.primary",
               }}
             >
               <Typography variant="h4" mb={3}>
@@ -694,7 +728,7 @@ const Products = () => {
                 backgroundImage: `url(${saleImg})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
-                height: { xs: 280, sm: 320, md: '100%' },
+                height: { xs: 280, sm: 320, md: "100%" },
                 position: "relative",
                 borderRadius: 3,
                 margin: "15px",
@@ -744,7 +778,7 @@ const Products = () => {
             justifyContent: "center",
             mb: 3,
             px: 2,
-            mt: {xs: -3, sm: 2, md: 3},
+            mt: { xs: -3, sm: 2, md: 3 },
           }}
         >
           <TextField
@@ -753,7 +787,7 @@ const Products = () => {
             onChange={(e) => handleSearch(e.target.value)}
             sx={{
               width: { xs: "100%", sm: "60%", md: "60%" },
-              backgroundColor: "#fff",
+              backgroundColor: theme.palette.background.paper,
               borderRadius: 3,
               boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
             }}
@@ -784,7 +818,9 @@ const Products = () => {
                       display: "flex",
                       flexDirection: "column",
                       justifyContent: "space-between",
-                      boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
+                      boxShadow: theme.shadows[3],
+                      bgcolor: "background.paper",
+                      color: "text.primary",
                       border: "1px solid #ccc",
                     }}
                   >
@@ -896,7 +932,10 @@ const Products = () => {
                                   }}
                                   sx={{
                                     marginRight: { xs: "0", md: "10px" },
-                                    color: "#000",
+                                    color:
+                                      theme.palette.mode === "dark"
+                                        ? "#fff"
+                                        : "#000",
                                     fontSize: "23px",
                                   }}
                                 >
@@ -914,6 +953,13 @@ const Products = () => {
                           >
                             <IconButton
                               color={isFavorite(product) ? "error" : "default"}
+                              sx={{
+                                color: isFavorite(product)
+                                  ? theme.palette.error.main
+                                  : theme.palette.mode === "dark"
+                                  ? "#fff"
+                                  : "#000",
+                              }}
                               onClick={(e) => {
                                 e.stopPropagation();
                                 const userEmail =

@@ -12,11 +12,13 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
+import { useTheme } from "@mui/material/styles";
 import { useNavigate } from "react-router-dom";
 import RemoveIcon from "@mui/icons-material/Remove";
 import { useCart } from "./CartProvider";
 
 const Cart = () => {
+  const theme = useTheme();
   // ========================== cart items ===============================
 
   const { cartItems, removeFromCart, updateQuantity } = useCart();
@@ -43,9 +45,9 @@ const Cart = () => {
   // ============================== quantity change ===============================
 
   const handleQuantityChange = (item, delta) => {
-  const newQty = Math.max(1, (item.quantity || 1) + delta);
-  updateQuantity(item.productId, newQty);
-};
+    const newQty = Math.max(1, (item.quantity || 1) + delta);
+    updateQuantity(item.productId, newQty);
+  };
 
   // ===============================================================================
 
@@ -72,7 +74,7 @@ const Cart = () => {
       {cartItems.length === 0 ? (
         <Typography
           variant="h6"
-          color="text.secondary"
+          color="text.primary"
           sx={{
             fontSize: { xs: "0.7rem", md: "1rem" },
             textAlign: { xs: "center", md: "left" },
@@ -97,10 +99,10 @@ const Cart = () => {
                     flexDirection: { xs: "column", sm: "row" },
                     alignItems: { xs: "center", sm: "flex-start" },
                     gap: 2,
-                    boxShadow: "0px 3px 6px rgba(0, 0, 0, 0.16)",
+                    border: `1px solid ${theme.palette.divider}`,
+                    backgroundColor: "background.paper",
                     p: 2,
                     position: "relative",
-                    border: "1px solid #ccc",
                   }}
                 >
                   <CardMedia
@@ -130,7 +132,7 @@ const Cart = () => {
                     </Typography>
                     <Typography
                       variant="subtitle1"
-                      color="text.secondary"
+                      color="text.primary"
                       sx={{ mt: 1 }}
                     >
                       ₹{getNumericPrice(item).toLocaleString("en-IN")}
@@ -169,13 +171,17 @@ const Cart = () => {
                     }}
                   >
                     <IconButton
+                      sx={{ color: "text.primary" }}
                       onClick={() => handleQuantityChange(item, -1)}
                       disabled={(item.quantity || 1) <= 1}
                     >
                       <RemoveIcon />
                     </IconButton>
                     <Typography>{item.quantity || 1}</Typography>
-                    <IconButton onClick={() => handleQuantityChange(item, 1)}>
+                    <IconButton
+                      onClick={() => handleQuantityChange(item, 1)}
+                      sx={{ color: "text.primary" }}
+                    >
                       <AddIcon />
                     </IconButton>
                   </Box>
@@ -210,14 +216,14 @@ const Cart = () => {
             <Box
               sx={{
                 p: 3,
-                border: "1px solid #ccc",
                 borderRadius: 2,
                 boxShadow: 3,
                 display: "flex",
                 height: { xs: "auto", md: "auto", lg: "500px" },
                 flexDirection: "column",
                 justifyContent: "space-between",
-                backgroundColor: "#f9f9f9",
+                backgroundColor: "background.paper",
+                border: `1px solid ${theme.palette.divider}`,
                 flexGrow: "1",
               }}
             >

@@ -32,6 +32,8 @@ const Favorites = () => {
         pt: { xs: 10, md: 13 },
         pb: { xs: 10, md: 13 },
         px: { xs: 2, md: 5 },
+        bgcolor: "background.default",
+        minHeight: "100vh",
       }}
     >
       <Typography
@@ -70,10 +72,11 @@ const Favorites = () => {
                 key={index}
                 sx={{
                   p: 3,
-                  border: "1px solid #ccc",
+                  border: "1px solid",
+                  borderColor: "divider",
                   borderRadius: 2,
                   boxShadow: 3,
-                  backgroundColor: "#fff",
+                  backgroundColor: "background.paper",
                   position: "relative",
                   width: "100%",
                 }}
@@ -97,8 +100,8 @@ const Favorites = () => {
                         position: "absolute",
                         top: 10,
                         right: 80,
-                        backgroundColor: "#FFD700",
-                        color: "#000",
+                        backgroundColor: "warning.main",
+                        color: "warning.contrastText",
                         fontWeight: "bold",
                         px: 1.5,
                         py: 0.5,

@@ -31,34 +31,32 @@ const ContactUs = () => {
     e.preventDefault();
     setStatus({ loading: true, success: null, error: null });
 
-    emailjs
-      .sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, USER_ID)
-      .then(
-        (result) => {
-          console.log("Email sent:", result.text);
-          setStatus({
-            loading: false,
-            success: "Message sent successfully!",
-            error: null,
-          });
-          if (formRef.current) formRef.current.reset();
-        },
-        (error) => {
-          console.error("Email error:", error);
-          setStatus({
-            loading: false,
-            success: null,
-            error: "Failed to send message. Try again later.",
-          });
-        }
-      );
+    emailjs.sendForm(SERVICE_ID, TEMPLATE_ID, formRef.current, USER_ID).then(
+      (result) => {
+        console.log("Email sent:", result.text);
+        setStatus({
+          loading: false,
+          success: "Message sent successfully!",
+          error: null,
+        });
+        if (formRef.current) formRef.current.reset();
+      },
+      (error) => {
+        console.error("Email error:", error);
+        setStatus({
+          loading: false,
+          success: null,
+          error: "Failed to send message. Try again later.",
+        });
+      }
+    );
   };
 
   return (
     <Box
       id="contact"
       sx={{
-        bgcolor: "#fff",
+        bgcolor: "background.default",
         height: "auto",
         pt: { xs: "20px", sm: "20px" },
       }}
@@ -72,7 +70,7 @@ const ContactUs = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          color: "#000",
+          color: "text.primary",
           textAlign: "center",
         }}
       >
@@ -126,7 +124,12 @@ const ContactUs = () => {
         >
           <Box sx={{ width: { xs: "100%", md: "48%" } }}>
             <Card
-              sx={{ p: { xs: 2, sm: 4 }, borderRadius: 3, boxShadow: 3 }}
+              sx={{
+                p: { xs: 2, sm: 4 },
+                borderRadius: 3,
+                boxShadow: 3,
+                bgcolor: "background.paper",
+              }}
               component="form"
               ref={formRef}
               onSubmit={handleSubmit}
@@ -146,6 +149,7 @@ const ContactUs = () => {
                 name="name"
                 margin="normal"
                 required
+                sx={{ bgcolor: "background.paper" }}
               />
               <TextField
                 fullWidth
@@ -153,12 +157,14 @@ const ContactUs = () => {
                 name="email"
                 margin="normal"
                 required
+                sx={{ bgcolor: "background.paper" }}
               />
               <TextField
                 fullWidth
                 label="Title"
                 name="title"
                 margin="normal"
+                sx={{ bgcolor: "background.paper" }}
               />
               <TextField
                 fullWidth
@@ -168,6 +174,7 @@ const ContactUs = () => {
                 multiline
                 rows={4}
                 required
+                sx={{ bgcolor: "background.paper" }}
               />
               <Button
                 type="submit"
@@ -180,12 +187,12 @@ const ContactUs = () => {
               </Button>
 
               {status.success && (
-                <Typography color="green" sx={{ mt: 2 }}>
+                <Typography color="success.main" sx={{ mt: 2 }}>
                   {status.success}
                 </Typography>
               )}
               {status.error && (
-                <Typography color="red" sx={{ mt: 2 }}>
+                <Typography color="error.main" sx={{ mt: 2 }}>
                   {status.error}
                 </Typography>
               )}

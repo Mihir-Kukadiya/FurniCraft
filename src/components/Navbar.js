@@ -21,15 +21,23 @@ import { useFavorites } from "./FavoritesProvider";
 import Tooltip from "@mui/material/Tooltip";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import { FaCartShopping } from "react-icons/fa6";
+import { useTheme } from "@mui/material/styles";
 import { FaHeart } from "react-icons/fa";
 import { Link, useNavigate } from "react-router-dom";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Drawer from "@mui/material/Drawer";
 import List from "@mui/material/List";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import MenuIcon from "@mui/icons-material/Menu";
+import { useThemeMode } from "../theme/ThemeContext";
 const Navbar = () => {
+  // ========================= theme ============================
+  const theme = useTheme();
+  const { mode, toggleTheme } = useThemeMode();
+
   // ========================= responsive ============================
 
   const isSmallScreen = useMediaQuery("(max-width: 900px)");
@@ -164,7 +172,8 @@ const Navbar = () => {
             borderRadius: 3,
             overflow: "hidden",
             boxShadow: 5,
-            backgroundColor: "#f9f9f9",
+            bgcolor: "background.paper",
+            color: "text.primary",
           },
         }}
       >
@@ -179,8 +188,8 @@ const Navbar = () => {
           <Box sx={{ position: "relative", display: "inline-block" }}>
             <Avatar
               sx={{
-                bgcolor: "#fff",
-                color: "#42a5f5",
+                bgcolor: theme.palette.background.paper,
+                color: theme.palette.primary.main,
                 fontSize: "32px",
                 mb: "16px",
                 height: "80px",
@@ -202,16 +211,16 @@ const Navbar = () => {
 
         <Box sx={{ p: 3 }}>
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" color="textSecondary">
+            <Typography variant="subtitle2" color="text.secondary">
               Email
             </Typography>
             <Typography
               variant="body1"
               sx={{
                 p: 1,
-                border: "1px solid #ddd",
+                backgroundColor: "background.paper",
+                border: `1px solid ${theme.palette.divider}`,
                 borderRadius: 1,
-                backgroundColor: "#fff",
                 wordBreak: "break-all",
               }}
             >
@@ -222,16 +231,16 @@ const Navbar = () => {
           {/* Password shown ONLY for normal users */}
           {sessionStorage.getItem("isAdmin") !== "true" && (
             <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" color="textSecondary">
+              <Typography variant="subtitle2" color="text.secondary">
                 Password
               </Typography>
               <Typography
                 variant="body1"
                 sx={{
                   p: 1,
-                  border: "1px solid #ddd",
+                  backgroundColor: "background.paper",
+                  border: `1px solid ${theme.palette.divider}`,
                   borderRadius: 1,
-                  backgroundColor: "#fff",
                   fontFamily: "monospace",
                 }}
               >
@@ -242,16 +251,16 @@ const Navbar = () => {
 
           {sessionStorage.getItem("isAdmin") === "true" && (
             <Box sx={{ mb: 2 }}>
-              <Typography variant="subtitle2" color="textSecondary">
+              <Typography variant="subtitle2" color="text.secondary">
                 Password
               </Typography>
               <Typography
                 variant="body1"
                 sx={{
                   p: 1,
-                  border: "1px solid #ddd",
+                  backgroundColor: "background.paper",
+                  border: `1px solid ${theme.palette.divider}`,
                   borderRadius: 1,
-                  backgroundColor: "#fff",
                   fontFamily: "monospace",
                 }}
               >
@@ -587,7 +596,12 @@ const Navbar = () => {
             value={securityQuestion}
             disabled
             fullWidth
-            sx={{ backgroundColor: "#f0f0f0" }}
+            sx={{
+              input: { color: "text.primary" },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.divider,
+              },
+            }}
           />
 
           {/* Security Answer */}
@@ -597,6 +611,12 @@ const Navbar = () => {
             value={securityAnswer}
             onChange={(e) => setSecurityAnswer(e.target.value)}
             fullWidth
+            sx={{
+              input: { color: "text.primary" },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.divider,
+              },
+            }}
           />
 
           {/* New Password */}
@@ -606,6 +626,12 @@ const Navbar = () => {
             value={newUserPassword}
             onChange={(e) => setNewUserPassword(e.target.value)}
             fullWidth
+            sx={{
+              input: { color: "text.primary" },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: theme.palette.divider,
+              },
+            }}
           />
 
           <Button
@@ -670,7 +696,8 @@ const Navbar = () => {
             borderRadius: 3,
             overflow: "hidden",
             boxShadow: 5,
-            backgroundColor: "#f9f9f9",
+            bgcolor: "background.paper",
+            color: "text.primary",
           },
         }}
       >
@@ -685,8 +712,8 @@ const Navbar = () => {
           <Box sx={{ position: "relative", display: "inline-block" }}>
             <Avatar
               sx={{
-                bgcolor: "#fff",
-                color: "#42a5f5",
+                bgcolor: theme.palette.background.paper,
+                color: theme.palette.primary.main,
                 fontSize: "32px",
                 mb: "16px",
                 height: "80px",
@@ -706,7 +733,7 @@ const Navbar = () => {
 
         <Box sx={{ p: 3 }}>
           <Box sx={{ mb: 2 }}>
-            <Typography variant="subtitle2" color="textSecondary">
+            <Typography variant="subtitle2" color="text.secondary">
               Email
             </Typography>
             <input
@@ -717,13 +744,15 @@ const Navbar = () => {
                 width: "100%",
                 padding: "10px",
                 borderRadius: "4px",
-                border: "1px solid #ccc",
+                border: `1px solid ${theme.palette.divider}`,
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
               }}
             />
           </Box>
 
           <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle2" color="textSecondary">
+            <Typography variant="subtitle2" color="text.secondary">
               Password
             </Typography>
 
@@ -737,7 +766,9 @@ const Navbar = () => {
                 width: "100%",
                 padding: "10px",
                 borderRadius: "4px",
-                border: "1px solid #ccc",
+                border: `1px solid ${theme.palette.divider}`,
+                backgroundColor: theme.palette.background.paper,
+                color: theme.palette.text.primary,
               }}
             />
           </Box>
@@ -793,7 +824,7 @@ const Navbar = () => {
             sx={{
               fontWeight: "bold",
               cursor: "pointer",
-              color: "#000",
+              color: "text.primary",
               textDecoration: "none",
             }}
             component={"a"}
@@ -1002,6 +1033,12 @@ const Navbar = () => {
                   </Badge>
                 </IconButton>
               </Tooltip>
+              <Tooltip title={mode === "dark" ? "Light Mode" : "Dark Mode"}>
+                <IconButton onClick={toggleTheme} color="inherit">
+                  {mode === "dark" ? <LightModeIcon /> : <DarkModeIcon />}
+                </IconButton>
+              </Tooltip>
+
               <IconButton
                 size="small"
                 onClick={handleMenu}
@@ -1015,7 +1052,7 @@ const Navbar = () => {
                     bgcolor:
                       sessionStorage.getItem("isAdmin") === "true"
                         ? "#2f4bd7"
-                        : "#1976D2",
+                        : "primary.main",
                     color: "#000",
                   }}
                 >
