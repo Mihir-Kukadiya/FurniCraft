@@ -13,6 +13,7 @@ import {
   Button,
   Stack,
 } from "@mui/material";
+import emailjs from "emailjs-com";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
@@ -41,22 +42,44 @@ const Orders = () => {
 
   // ======================= update order status [ Complete ] =======================
 
-  const markAsCompleted = async (id) => {
-    try {
-      await axios.put(`http://localhost:3000/api/orders/${id}/status`, {
-        status: "Completed",
-      });
+  const markAsCompleted = async (order) => {
+  try {
+    await axios.put(
+      `http://localhost:3000/api/orders/${order._id}/status`,
+      { status: "Completed" }
+    );
 
-      const updatedOrders = orders.filter((o) => o._id !== id);
-      setOrders(updatedOrders);
-      localStorage.setItem("orders", JSON.stringify(updatedOrders));
+    await emailjs.send(
+      "service_xtmr7ji",
+      "template_rgik6v6",
+      {
+        to_email: order.customerEmail,
+        customer_name: order.customerName,
+        order_id: order._id,
+        order_total: order.total,
+      },
+      "j4TLiqXB52zF5dvpD"
+    );
 
-      Swal.fire("Updated!", "Order marked as Completed.", "success");
-    } catch (error) {
-      console.error("Failed to mark order as completed:", error);
-      Swal.fire("Error", "Failed to mark order as completed.", "error");
-    }
-  };
+    const updatedOrders = orders.filter((o) => o._id !== order._id);
+    setOrders(updatedOrders);
+    localStorage.setItem("orders", JSON.stringify(updatedOrders));
+
+    Swal.fire(
+      "Completed!",
+      "Order completed & email sent to customer.",
+      "success"
+    );
+  } catch (error) {
+    console.error(error);
+    Swal.fire(
+      "Error",
+      "Order updated but email failed to send.",
+      "warning"
+    );
+  }
+};
+
 
   // ======================= delete order =======================
 
@@ -207,7 +230,7 @@ const Orders = () => {
                             flex: 1,
                             minWidth: "90px",
                           }}
-                          onClick={() => markAsCompleted(order._id)}
+                          onClick={() => markAsCompleted(order)}
                         >
                           Complete
                         </Button>

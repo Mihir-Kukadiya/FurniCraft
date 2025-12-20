@@ -20,28 +20,34 @@ const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState([]);
   const [message, setMessage] = useState("");
 
+  // ===================== Fetch Cart =====================
+
   useEffect(() => {
     if (!email) return;
-    axios.get(`${API}/${email}`)
+    axios
+      .get(`${API}/${email}`)
       .then((res) => setCartItems(res.data))
       .catch(() => setCartItems([]));
   }, [email]);
 
-
-  // ===================== clear cart =======================
+  // ===================== Clear Cart =====================
 
   const clearCart = async () => {
-    if (!email) return setCartItems([]);
+    if (!email) {
+      setCartItems([]);
+      return;
+    }
     await axios.delete(`${API}/clear/${email}`);
     setCartItems([]);
   };
 
-  // ===================== add to cart =======================
+  // ===================== Add To Cart =====================
 
   const addToCart = async (product) => {
-
     const idToCheck = product._id || product.name;
-    const exists = cartItems.some(item => (item._id || item.name) === idToCheck);
+    const exists = cartItems.some(
+      (item) => (item.productId || item.name) === idToCheck
+    );
 
     if (exists) {
       setMessage("Product is already in the cart!");
@@ -50,29 +56,71 @@ const CartProvider = ({ children }) => {
     }
 
     const normalized = {
-      ...product,
       productId: product._id,
+      name: product.name,
       price: parsePriceToNumber(product.price),
       image: product.image || product.img || product.imgUrl || "",
       quantity: 1,
     };
 
     if (email) {
-      await axios.post(`${API}/add`, { email, product: normalized })
-        .then(res => setCartItems(res.data.cart));
+      const res = await axios.post(`${API}/add`, {
+        email,
+        product: normalized,
+      });
+      setCartItems(res.data.cart);
     } else {
-      setCartItems(prev => [...prev, normalized]);
+      setCartItems((prev) => [...prev, normalized]);
     }
 
     setMessage("Product added to cart!");
     setTimeout(() => setMessage(""), 2000);
   };
 
-  // ================================================================
+  // ===================== Remove From Cart (FIXED) =====================
+
+  const removeFromCart = async (productId) => {
+    if (!email) {
+      setCartItems((prev) =>
+        prev.filter((item) => item.productId !== productId)
+      );
+      return;
+    }
+
+    const res = await axios.delete(`${API}/remove`, {
+      data: { email, productId },
+    });
+
+    setCartItems(res.data);
+  };
+
+  // ===================== Update Quantity (SYNCED) =====================
+
+  const updateQuantity = async (productId, quantity) => {
+    if (!email) return;
+
+    const res = await axios.put(`${API}/quantity`, {
+      email,
+      productId,
+      quantity,
+    });
+
+    setCartItems(res.data);
+  };
+
+  // =====================================================
 
   return (
     <CartContext.Provider
-      value={{ cartItems, setCartItems, addToCart, clearCart, message }}
+      value={{
+        cartItems,
+        setCartItems,
+        addToCart,
+        removeFromCart,
+        updateQuantity,
+        clearCart,
+        message,
+      }}
     >
       {children}
     </CartContext.Provider>

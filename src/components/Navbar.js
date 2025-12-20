@@ -176,17 +176,15 @@ const Navbar = () => {
             textAlign: "center",
           }}
         >
-          <Box
-            sx={{ position: "relative", display: "inline-block" }}
-          >
+          <Box sx={{ position: "relative", display: "inline-block" }}>
             <Avatar
               sx={{
                 bgcolor: "#fff",
                 color: "#42a5f5",
-                fontSize: '32px',
-                mb: '16px',
-                height: '80px',
-                width: '80px'
+                fontSize: "32px",
+                mb: "16px",
+                height: "80px",
+                width: "80px",
               }}
             >
               {sessionStorage.getItem("isAdmin") === "true"
@@ -269,7 +267,7 @@ const Navbar = () => {
               sx={{ mb: 2 }}
               onClick={() => {
                 setNewAdminEmail(email || "");
-                setNewAdminPassword("");
+                setNewAdminPassword(storedPassword || "");
 
                 setIsDialogOpen(false);
                 setIsEditProfileOpen(true);
@@ -689,10 +687,10 @@ const Navbar = () => {
               sx={{
                 bgcolor: "#fff",
                 color: "#42a5f5",
-                fontSize: '32px',
-                mb: '16px',
-                height: '80px',
-                width: '80px'
+                fontSize: "32px",
+                mb: "16px",
+                height: "80px",
+                width: "80px",
               }}
             >
               {sessionStorage.getItem("isAdmin") === "true"
@@ -726,21 +724,14 @@ const Navbar = () => {
 
           <Box sx={{ mb: 3 }}>
             <Typography variant="subtitle2" color="textSecondary">
-              New Password
+              Password
             </Typography>
 
             <input
-              type="password"
-              name="password"
-              autoComplete="current-password"
-              style={{ display: "none" }}
-            />
-
-            <input
-              placeholder="Enter new password"
+              placeholder="Enter password"
               value={newAdminPassword}
-              autoComplete="new-password"
-              name="new-password"
+              autoComplete="off"
+              name={`admin-password-${Date.now()}`}
               onChange={(e) => setNewAdminPassword(e.target.value)}
               style={{
                 width: "100%",
@@ -758,10 +749,9 @@ const Navbar = () => {
             onClick={async () => {
               try {
                 await axios.put("http://localhost:3000/api/admin/update", {
-  email: newAdminEmail,
-  password: newAdminPassword,
-});
-
+                  email: newAdminEmail,
+                  password: newAdminPassword,
+                });
 
                 setSnackbarMessage("Admin profile updated successfully");
                 setSnackbarSeverity("success");

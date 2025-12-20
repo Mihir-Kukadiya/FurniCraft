@@ -17,10 +17,9 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import { useCart } from "./CartProvider";
 
 const Cart = () => {
-
   // ========================== cart items ===============================
 
-  const { cartItems, setCartItems } = useCart();
+  const { cartItems, removeFromCart, updateQuantity } = useCart();
   const navigate = useNavigate();
 
   // ============================ set price in numeric ===============================
@@ -43,21 +42,10 @@ const Cart = () => {
 
   // ============================== quantity change ===============================
 
-  const handleQuantityChange = (index, delta) => {
-    const updated = cartItems.map((item, i) =>
-      i === index
-        ? { ...item, quantity: Math.max(1, (item.quantity || 1) + delta) }
-        : item
-    );
-    setCartItems(updated);
-  };
-
-  // =========================== remove items from cart ============================
-
-  const removeFromCart = (index) => {
-    const updated = cartItems.filter((_, i) => i !== index);
-    setCartItems(updated);
-  };
+  const handleQuantityChange = (item, delta) => {
+  const newQty = Math.max(1, (item.quantity || 1) + delta);
+  updateQuantity(item.productId, newQty);
+};
 
   // ===============================================================================
 
@@ -93,7 +81,11 @@ const Cart = () => {
           No items in your cart.
         </Typography>
       ) : (
-        <Grid container spacing={4} sx={{ flexDirection: { xs: "column", md: "row" } }}>
+        <Grid
+          container
+          spacing={4}
+          sx={{ flexDirection: { xs: "column", md: "row" } }}
+        >
           <Grid item xs={12} md={8} sx={{ maxWidth: "100%", flexGrow: 1 }}>
             <Stack spacing={3}>
               {cartItems.map((item, index) => (
@@ -122,11 +114,25 @@ const Cart = () => {
                     }}
                   />
 
-                  <CardContent sx={{ flex: 1, textAlign: { xs: "center", sm: "left" }, pt: { xs: 2, sm: 0 } }}>
-                    <Typography variant="h6" fontWeight="bold" sx={{ wordBreak: "break-word" }}>
+                  <CardContent
+                    sx={{
+                      flex: 1,
+                      textAlign: { xs: "center", sm: "left" },
+                      pt: { xs: 2, sm: 0 },
+                    }}
+                  >
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
+                      sx={{ wordBreak: "break-word" }}
+                    >
                       {item.name}
                     </Typography>
-                    <Typography variant="subtitle1" color="text.secondary" sx={{ mt: 1 }}>
+                    <Typography
+                      variant="subtitle1"
+                      color="text.secondary"
+                      sx={{ mt: 1 }}
+                    >
                       ₹{getNumericPrice(item).toLocaleString("en-IN")}
                     </Typography>
                   </CardContent>
@@ -152,18 +158,41 @@ const Cart = () => {
                     </Typography>
                   )}
 
-                  <Box sx={{ position: { xs: "static", md: "absolute" }, bottom: { md: 10 }, right: { md: 60 }, display: "flex", alignItems: "center", gap: 1 }}>
-                    <IconButton onClick={() => handleQuantityChange(index, -1)} disabled={(item.quantity || 1) <= 1}>
+                  <Box
+                    sx={{
+                      position: { xs: "static", md: "absolute" },
+                      bottom: { md: 10 },
+                      right: { md: 60 },
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <IconButton
+                      onClick={() => handleQuantityChange(item, -1)}
+                      disabled={(item.quantity || 1) <= 1}
+                    >
                       <RemoveIcon />
                     </IconButton>
                     <Typography>{item.quantity || 1}</Typography>
-                    <IconButton onClick={() => handleQuantityChange(index, 1)}>
+                    <IconButton onClick={() => handleQuantityChange(item, 1)}>
                       <AddIcon />
                     </IconButton>
                   </Box>
 
-                  <Box sx={{ position: "absolute", right: 0, bottom: 10, paddingBottom: { xs: 0.7, md: 0 }, paddingRight: { xs: 1, md: 0 } }}>
-                    <IconButton color="error" onClick={() => removeFromCart(index)}>
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      right: 0,
+                      bottom: 10,
+                      paddingBottom: { xs: 0.7, md: 0 },
+                      paddingRight: { xs: 1, md: 0 },
+                    }}
+                  >
+                    <IconButton
+                      color="error"
+                      onClick={() => removeFromCart(item.productId)}
+                    >
                       <DeleteIcon />
                     </IconButton>
                   </Box>
@@ -172,7 +201,12 @@ const Cart = () => {
             </Stack>
           </Grid>
 
-          <Grid item xs={12} md={4} sx={{ width: { xs: "100%", md: "100%", lg: "500px" } }}>
+          <Grid
+            item
+            xs={12}
+            md={4}
+            sx={{ width: { xs: "100%", md: "100%", lg: "500px" } }}
+          >
             <Box
               sx={{
                 p: 3,
@@ -190,16 +224,31 @@ const Cart = () => {
               <Typography variant="h5" fontWeight="bold" gutterBottom>
                 Order Summary
               </Typography>
-              <Box sx={{ flexGrow: 1, overflowY: "auto", maxHeight: "400px", pr: 1 }}>
+              <Box
+                sx={{
+                  flexGrow: 1,
+                  overflowY: "auto",
+                  maxHeight: "400px",
+                  pr: 1,
+                }}
+              >
                 <Divider sx={{ mb: 2 }} />
 
                 {cartItems.map((item, i) => (
-                  <Box key={i} display="flex" justifyContent="space-between" mb={1}>
+                  <Box
+                    key={i}
+                    display="flex"
+                    justifyContent="space-between"
+                    mb={1}
+                  >
                     <Typography variant="body2">
                       {item.name} × {item.quantity || 1}
                     </Typography>
                     <Typography variant="body2">
-                      ₹{(getNumericPrice(item) * (item.quantity || 1)).toLocaleString("en-IN")}
+                      ₹
+                      {(
+                        getNumericPrice(item) * (item.quantity || 1)
+                      ).toLocaleString("en-IN")}
                     </Typography>
                   </Box>
                 ))}
@@ -216,7 +265,14 @@ const Cart = () => {
                 </Box>
               </Box>
 
-              <Button variant="contained" color="success" size="large" fullWidth sx={{ mt: 2 }} onClick={() => navigate("/payment")}>
+              <Button
+                variant="contained"
+                color="success"
+                size="large"
+                fullWidth
+                sx={{ mt: 2 }}
+                onClick={() => navigate("/payment")}
+              >
                 Proceed to Checkout
               </Button>
             </Box>

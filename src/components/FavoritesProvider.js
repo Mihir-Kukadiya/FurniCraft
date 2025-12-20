@@ -44,16 +44,18 @@ const FavoritesProvider = ({ children }) => {
     setTimeout(() => setMessage(""), 2000);
   };
 
-  const isFavorite = (p) => favorites.some((i) => i.name === p.name);
+  const isFavorite = (p) => favorites.some((i) => i.productId === p._id);
 
   const removeFavorite = async (product) => {
     if (email) {
       const res = await axios.delete(`${API}/remove`, {
-        data: { email, productId: product._id },
+        data: { email, productId: product.productId },
       });
       setFavorites(res.data);
     } else {
-      setFavorites((prev) => prev.filter((i) => i.name !== product.name));
+      setFavorites((prev) =>
+        prev.filter((i) => i.productId !== product.productId)
+      );
     }
 
     setMessage("Product removed from favorites!");
