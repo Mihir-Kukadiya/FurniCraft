@@ -9,6 +9,7 @@ import {
   Grid,
   IconButton,
 } from "@mui/material";
+import axios from "axios";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
@@ -40,6 +41,29 @@ const Address = () => {
   useEffect(() => {
     localStorage.setItem(storageKey, JSON.stringify(addresses));
   }, [addresses, storageKey]);
+
+  // ============================= fetch address ===============================
+
+  const API = "http://localhost:3000";
+
+  useEffect(() => {
+    if (!email) return;
+
+    axios
+        .get(`${API}/api/addresses/${email}`)
+        .then((res) => setAddresses(res.data))
+        .catch(console.error);
+  }, [email]);
+
+  const fetchAddresses = async () => {
+    const res = await axios.get(`${API}/api/addresses/${email}`);
+    setAddresses(res.data);
+  };
+
+  useEffect(() => {
+    if (email) fetchAddresses();
+  }, [email]);
+
 
   // ===================== Auto generate city & state when pincode is 6 digits ==================
 
@@ -97,33 +121,51 @@ const Address = () => {
 
   // ========================== Add address =============================
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
-    if (editIndex !== -1) {
-      const updated = [...addresses];
-      updated[editIndex] = form;
-      setAddresses(updated);
-      setEditIndex(-1);
-    } else {
-      if (addresses.length >= 2) {
-        alert("You can only save up to 2 addresses.");
-        return;
-      }
-      setAddresses([...addresses, form]);
-    }
+    const payload = { ...form, userEmail: email };
 
-    setForm({
-      name: "",
-      street: "",
-      city: "",
-      state: "",
-      pincode: "",
-      mobile: "",
-    });
-    setErrors({});
+    try {
+      if (editIndex !== -1) {
+        const id = addresses[editIndex]._id;
+        const res = await axios.put(
+            `${API}/api/addresses/${id}`,
+            payload
+        );
+
+        setAddresses((prev) =>
+            prev.map((a, i) => (i === editIndex ? res.data : a))
+        );
+        setEditIndex(-1);
+      } else {
+        if (addresses.length >= 2) {
+          alert("You can only save up to 2 addresses.");
+          return;
+        }
+
+        const res = await axios.post(
+            `${API}/api/addresses`,
+            payload
+        );
+        setAddresses((prev) => [...prev, res.data]);
+      }
+
+      setForm({
+        name: "",
+        street: "",
+        city: "",
+        state: "",
+        pincode: "",
+        mobile: "",
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Failed to save address");
+    }
   };
+
 
   // ========================== Edit address =============================
 
@@ -134,21 +176,13 @@ const Address = () => {
 
   // ========================== Delete address =============================
 
-  const handleDelete = (index) => {
-    const updated = addresses.filter((_, i) => i !== index);
-    setAddresses(updated);
-    if (editIndex === index) {
-      setForm({
-        name: "",
-        street: "",
-        city: "",
-        state: "",
-        pincode: "",
-        mobile: "",
-      });
-      setEditIndex(-1);
-    }
+  const handleDelete = async (index) => {
+    const id = addresses[index]._id;
+
+    await axios.delete(`${API}/api/addresses/${id}`);
+    setAddresses((prev) => prev.filter((_, i) => i !== index));
   };
+
 
   // ===================================================================
 

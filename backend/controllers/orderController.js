@@ -5,18 +5,18 @@ import Order from "../models/Order.js";
 const getOrders = async (req, res) => {
   try {
     const orders = await Order.find()
-      .select('+orderDate +receiveDate')
+      .select("+orderDate +receiveDate")
       .sort({ createdAt: -1 });
-    
+
     console.log("📋 Fetched orders count:", orders.length);
     if (orders.length > 0) {
       console.log("Sample order dates:", {
         orderDate: orders[0].orderDate,
         receiveDate: orders[0].receiveDate,
-        createdAt: orders[0].createdAt
+        createdAt: orders[0].createdAt,
       });
     }
-    
+
     res.json(orders);
   } catch (err) {
     console.error("❌ Fetch orders error:", err);
@@ -34,29 +34,22 @@ const createOrder = async (req, res) => {
 
     // ================== BACKEND TOTAL CALCULATION ==================
 
-    // 1️⃣ Subtotal
     const subtotal = items.reduce(
       (sum, item) => sum + item.price * item.quantity,
       0
     );
 
-    // 2️⃣ Discount (10%)
-    const discount = subtotal * 0.10;
+    const discount = subtotal * 0.1;
     const taxableAmount = subtotal - discount;
 
-    // 3️⃣ GST
     const cgst = taxableAmount * 0.09;
     const sgst = taxableAmount * 0.09;
     const igst = 0;
 
-    // 4️⃣ Shipping
     const shipping = subtotal > 2000 ? 0 : 100;
 
-    // 5️⃣ Final Total (GST INCLUDED)
-    const expectedTotal =
-      taxableAmount + cgst + sgst + igst + shipping;
+    const expectedTotal = taxableAmount + cgst + sgst + igst + shipping;
 
-    // 6️⃣ FLOAT SAFE COMPARISON
     if (Math.abs(total - expectedTotal) > 0.01) {
       return res.status(400).json({
         message: `Invalid total amount. Expected ${expectedTotal.toFixed(
@@ -104,7 +97,6 @@ const createOrder = async (req, res) => {
   }
 };
 
-
 // ============================== Update Order Status ==========================
 
 const updateOrderStatus = async (req, res) => {
@@ -115,7 +107,7 @@ const updateOrderStatus = async (req, res) => {
     console.log("📝 Updating order:", id, "to status:", status);
 
     const existingOrder = await Order.findById(id);
-    
+
     if (!existingOrder) {
       return res.status(404).json({ message: "Order not found" });
     }
@@ -127,17 +119,16 @@ const updateOrderStatus = async (req, res) => {
       console.log("✅ Setting receiveDate:", updateData.receiveDate);
     }
 
-    const updatedOrder = await Order.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    );
+    const updatedOrder = await Order.findByIdAndUpdate(id, updateData, {
+      new: true,
+      runValidators: true,
+    });
 
     console.log("📦 Updated order:", {
       id: updatedOrder._id,
       status: updatedOrder.status,
       orderDate: updatedOrder.orderDate,
-      receiveDate: updatedOrder.receiveDate
+      receiveDate: updatedOrder.receiveDate,
     });
 
     res.json(updatedOrder);
@@ -172,9 +163,4 @@ const deleteOrder = async (req, res) => {
   }
 };
 
-export {
-  getOrders,
-  createOrder,
-  updateOrderStatus,
-  deleteOrder,
-};
+export { getOrders, createOrder, updateOrderStatus, deleteOrder };

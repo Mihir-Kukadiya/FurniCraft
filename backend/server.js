@@ -9,6 +9,7 @@ import orderRoutes from "./routes/orderRoutes.js";
 import cartRoutes from "./routes/cartRoutes.js";
 import favoriteRoutes from "./routes/favoritesRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import addressRoutes from "./routes/addressRoutes.js";
 
 dotenv.config();
 
@@ -28,6 +29,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/favorites", favoriteRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/addresses", addressRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
