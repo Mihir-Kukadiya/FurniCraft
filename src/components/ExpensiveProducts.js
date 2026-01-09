@@ -20,7 +20,7 @@ import { MdEdit } from "react-icons/md";
 import { FaRegTrashAlt } from "react-icons/fa";
 import { Dialog, DialogTitle, DialogContent, TextField } from "@mui/material";
 import { useCart } from "./CartProvider";
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 import { useFavorites } from "./FavoritesProvider";
 import { useTheme } from "@mui/material/styles";
 import ProductDetail from "./ProductDetail";
@@ -42,7 +42,7 @@ const ExpensiveProducts = () => {
   useEffect(() => {
     const fetchExpensiveProducts = async () => {
       try {
-        const res = await axios.get(
+        const res = await axiosInstance.get(
           "http://localhost:3000/api/expensive-products"
         );
 
@@ -256,7 +256,7 @@ const ExpensiveProducts = () => {
                 variant="contained"
                 onClick={async () => {
                   try {
-                    const res = await axios.post(
+                    const res = await axiosInstance.post(
                       "http://localhost:3000/api/expensive-products",
                       { ...newProduct, price: Number(newProduct.price) }
                     );
@@ -458,7 +458,7 @@ const ExpensiveProducts = () => {
                 <Button
                   variant="contained"
                   onClick={async () => {
-                    const res = await axios.put(
+                    const res = await axiosInstance.put(
                       `http://localhost:3000/api/expensive-products/${editProduct._id}`,
                       { ...editProduct, price: Number(editProduct.price) }
                     );
@@ -647,147 +647,6 @@ const ExpensiveProducts = () => {
                             ₹{Number(product.price).toLocaleString("en-IN")}
                           </Typography>
                         </Box>
-
-                        {/* <Box
-                          sx={{
-                            mt: "auto",
-                            display: "flex",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <Button
-                            variant="outlined"
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              const userEmail = sessionStorage.getItem("email");
-                              const isAdmin =
-                                sessionStorage.getItem("isAdmin") === "true";
-
-                              if (userEmail && !isAdmin) {
-                                addToCart(product);
-                              } else if (isAdmin) {
-                                setSnackbarMessage(
-                                  "Admin cannot add items to cart"
-                                );
-                                setSnackbarSeverity("warning");
-                                setOpenSnackbar(true);
-                              } else {
-                                setSnackbarMessage(
-                                  "Please log in to add items to your cart"
-                                );
-                                setSnackbarSeverity("warning");
-                                setOpenSnackbar(true);
-                              }
-                            }}
-                          >
-                            Add to Cart
-                          </Button>
-                          <Box>
-                            {isAdmin && (
-                              <>
-                                <Tooltip title="Delete">
-                                  <IconButton
-                                    sx={{
-                                      marginRight: { xs: "0", md: "10px" },
-                                      color: "#f44336",
-                                      fontSize: "20px",
-                                    }}
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      axios
-                                        .delete(
-                                          `http://localhost:3000/api/expensive-products/${product._id}`
-                                        )
-                                        .then(() => {
-                                          setExpensiveProducts((prev) =>
-                                            prev.filter(
-                                              (p) => p._id !== product._id
-                                            )
-                                          );
-                                        });
-                                    }}
-                                  >
-                                    <FaRegTrashAlt />
-                                  </IconButton>
-                                </Tooltip>
-
-                                <Tooltip title="Edit">
-                                  <IconButton
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setEditProduct(product);
-                                      setIsEditDialogOpen(true);
-                                    }}
-                                    sx={{
-                                      marginRight: { xs: "0", md: "10px" },
-                                      color:
-                                        theme.palette.mode === "dark"
-                                          ? "#fff"
-                                          : "#000",
-                                      fontSize: "23px",
-                                    }}
-                                  >
-                                    <MdEdit />
-                                  </IconButton>
-                                </Tooltip>
-                                <Tooltip
-                                  title={
-                                    isFavorited(product)
-                                      ? "Remove from favorites"
-                                      : "Add to favorites"
-                                  }
-                                >
-                                  <Tooltip
-                                    title={
-                                      isFavorited(product)
-                                        ? "Remove from favorites"
-                                        : "Add to favorites"
-                                    }
-                                  >
-                                    <IconButton
-                                      color={
-                                        isFavorited(product)
-                                          ? "error"
-                                          : "default"
-                                      }
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        const userEmail =
-                                          sessionStorage.getItem("email");
-                                        const isAdmin =
-                                          sessionStorage.getItem("isAdmin") ===
-                                          "true";
-
-                                        if (userEmail && !isAdmin) {
-                                          toggleFavorite(product);
-                                        } else if (isAdmin) {
-                                          setSnackbarMessage(
-                                            "Admin cannot add items in favorites"
-                                          );
-                                          setSnackbarSeverity("warning");
-                                          setOpenSnackbar(true);
-                                        } else {
-                                          setSnackbarMessage(
-                                            "Please log in to add items in favorites"
-                                          );
-                                          setSnackbarSeverity("warning");
-                                          setOpenSnackbar(true);
-                                        }
-                                      }}
-                                    >
-                                      {isFavorited(product) ? (
-                                        <FavoriteIcon />
-                                      ) : (
-                                        <FavoriteBorder />
-                                      )}
-                                    </IconButton>
-                                  </Tooltip>
-                                </Tooltip>
-                              </>
-                            )}
-                          </Box>
-                        </Box> */}
                         <Box
                           sx={{
                             mt: "auto",
@@ -832,7 +691,7 @@ const ExpensiveProducts = () => {
                                   <IconButton
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      axios
+                                      axiosInstance
                                         .delete(
                                           `http://localhost:3000/api/expensive-products/${product._id}`
                                         )

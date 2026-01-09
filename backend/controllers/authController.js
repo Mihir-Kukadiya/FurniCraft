@@ -17,9 +17,19 @@ export const login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: account._id, role: account.role },
+      {
+        id: account._id,
+        role: account.role,
+        email: account.email, // ✅ useful for debugging
+      },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
+    );
+
+    // ✅ LOG TOKEN BASED ON ROLE
+    console.log(
+      `🔐 ${account.role.toUpperCase()} JWT TOKEN:`,
+      token
     );
 
     res.json({

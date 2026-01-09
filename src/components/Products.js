@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import saleImg from "../images/Products/sale.jpg";
-import axios from "axios";
+import axiosInstance from "../utils/axiosInstance";
 import { useTheme } from "@mui/material/styles";
 import { MdEdit } from "react-icons/md";
 import { useFilters } from "./FiltersContext";
@@ -54,7 +54,7 @@ const Products = () => {
   // ================= Load products from MongoDB ==================
 
   useEffect(() => {
-    axios
+    axiosInstance
       .get("http://localhost:3000/api/products")
       .then((res) => setProductsData(res.data))
       .catch((err) => console.error(err));
@@ -84,7 +84,7 @@ const Products = () => {
   const [productsData, setProductsData] = useState([]);
 
   useEffect(() => {
-    axios
+    axiosInstance
       .get("http://localhost:3000/api/products")
       .then((res) => setProductsData(res.data))
       .catch((err) => console.error(err));
@@ -321,29 +321,24 @@ const Products = () => {
               <Button
                 variant="contained"
                 onClick={() => {
-                  axios
-                    .post("http://localhost:3000/api/products", newProduct)
-                    .then((res) => {
-                      setProductsData([...productsData, res.data]);
-                      setSnackbarMessage("Product added");
-                      setSnackbarSeverity("success");
-                      setOpenSnackbar(true);
+                  axiosInstance
+  .post("/products", newProduct)
+  .then((res) => {
+    setProductsData([...productsData, res.data]);
+    setSnackbarMessage("Product added successfully");
+    setSnackbarSeverity("success");
+    setOpenSnackbar(true);
+    setIsAddDialogOpen(false);
+  })
+  .catch((err) => {
+    console.error(err);
+    setSnackbarMessage(
+      err.response?.data?.message || "Error saving product"
+    );
+    setSnackbarSeverity("error");
+    setOpenSnackbar(true);
+  });
 
-                      setNewProduct({
-                        name: "",
-                        price: "",
-                        img: "",
-                        category: "",
-                        description: "",
-                      });
-                      setIsAddDialogOpen(false);
-                    })
-                    .catch((err) => {
-                      console.error("Error saving product:", err);
-                      setSnackbarMessage("Error saving product");
-                      setSnackbarSeverity("error");
-                      setOpenSnackbar(true);
-                    });
                 }}
                 sx={{
                   mt: 1,
@@ -532,28 +527,28 @@ const Products = () => {
                 <Button
                   variant="contained"
                   onClick={() => {
-                    axios
-                      .put(
-                        `http://localhost:3000/api/products/${editProduct._id}`,
-                        editProduct
-                      )
-                      .then((res) => {
-                        setProductsData((prev) =>
-                          prev.map((p) =>
-                            p._id === editProduct._id ? res.data : p
-                          )
-                        );
-                        setSnackbarMessage("Product updated successfully");
-                        setSnackbarSeverity("success");
-                        setOpenSnackbar(true);
-                        setIsEditDialogOpen(false);
-                      })
-                      .catch((err) => {
-                        console.error(err);
-                        setSnackbarMessage("Failed to update product");
-                        setSnackbarSeverity("error");
-                        setOpenSnackbar(true);
-                      });
+                    axiosInstance
+  .put(`/products/${editProduct._id}`, editProduct)
+  .then((res) => {
+    setProductsData((prev) =>
+      prev.map((p) =>
+        p._id === editProduct._id ? res.data : p
+      )
+    );
+    setSnackbarMessage("Product updated successfully");
+    setSnackbarSeverity("success");
+    setOpenSnackbar(true);
+    setIsEditDialogOpen(false);
+  })
+  .catch((err) => {
+    console.error(err);
+    setSnackbarMessage(
+      err.response?.data?.message || "Failed to update product"
+    );
+    setSnackbarSeverity("error");
+    setOpenSnackbar(true);
+  });
+
                   }}
                   sx={{
                     mt: 1,
@@ -878,29 +873,25 @@ const Products = () => {
                                 <IconButton
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    axios
-                                      .delete(
-                                        `http://localhost:3000/api/products/${product._id}`
-                                      )
-                                      .then(() => {
-                                        setProductsData((prev) =>
-                                          prev.filter(
-                                            (p) => p._id !== product._id
-                                          )
-                                        );
-                                        setSnackbarMessage(
-                                          "Product deleted successfully"
-                                        );
-                                        setSnackbarSeverity("success");
-                                        setOpenSnackbar(true);
-                                      })
-                                      .catch(() => {
-                                        setSnackbarMessage(
-                                          "Failed to delete product"
-                                        );
-                                        setSnackbarSeverity("error");
-                                        setOpenSnackbar(true);
-                                      });
+                                    axiosInstance
+  .delete(`/products/${product._id}`)
+  .then(() => {
+    setProductsData((prev) =>
+      prev.filter((p) => p._id !== product._id)
+    );
+    setSnackbarMessage("Product deleted successfully");
+    setSnackbarSeverity("success");
+    setOpenSnackbar(true);
+  })
+  .catch((err) => {
+    console.error(err);
+    setSnackbarMessage(
+      err.response?.data?.message || "Failed to delete product"
+    );
+    setSnackbarSeverity("error");
+    setOpenSnackbar(true);
+  });
+
                                   }}
                                   sx={{
                                     marginRight: { xs: "0", md: "10px" },

@@ -10,3 +10,5 @@ database = FurniCraft
 mongodb+srv://<username>:<password>@<cluster-url>/<database>?retryWrites=true&w=majority
 
 1. CRUD operations must be doing only admin globally (postman).
+2. applu cloudInary for product images.
+3. make .env for frontend.

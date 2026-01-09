@@ -6,11 +6,14 @@ import {
   updateExpensiveProduct,
 } from "../controllers/expensiveProductController.js";
 
+import { protect, adminOnly } from "../middlewares/AuthMiddleware.js";
+
 const router = express.Router();
 
 router.get("/", getExpensiveProducts);
-router.post("/", createExpensiveProduct);
-router.put("/:id", updateExpensiveProduct);
-router.delete("/:id", deleteExpensiveProduct);
+
+router.post("/", protect, adminOnly, createExpensiveProduct);
+router.put("/:id", protect, adminOnly, updateExpensiveProduct);
+router.delete("/:id", protect, adminOnly, deleteExpensiveProduct);
 
 export default router;

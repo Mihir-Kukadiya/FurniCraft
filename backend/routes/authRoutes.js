@@ -11,7 +11,6 @@ import { protect, adminOnly } from "../middlewares/AuthMiddleware.js";
 const router = express.Router();
 
 router.post("/login", login);
-
 router.post("/register", registerUser);
 router.post("/change-password", changePassword);
 
